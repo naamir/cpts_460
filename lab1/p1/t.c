@@ -2,12 +2,19 @@
 
 int prints(char *s)
 {
-// write YOUR code
+  // write YOUR code
+  
 }
 
 int gets(char *s)
 {
-// write YOUR code
+  // write YOUR code
+  while ((s = getc()) != '\r')
+  {
+    putc(s);
+    s++;
+  }
+  s = '\0'; // string termination
 }
 
 char ans[64];
