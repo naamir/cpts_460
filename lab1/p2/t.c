@@ -57,7 +57,7 @@ int search(INODE *ip, char *name)
     //if (ip->i_block[i] == 0)
       //break;
 
-    getblk(ip->i_block[i], buf2);  // get disk block
+    getblk((u16)ip->i_block[i], buf2);  // get disk block
     
     dp = (DIR *)buf2;
     cp = buf2;
@@ -97,11 +97,11 @@ main()
   ip = (INODE *)buf1 + 1;
 
   ino = (u16)search(ip,"boot")-1;
-  getblk(iblk+(ino/8), buf1);
+  getblk((u16)iblk+(ino/8), buf1);
   ip = (INODE *)buf1 + (ino % 8);
 
   ino = (u16)search(ip,"mtx")-1;
-  getblk(iblk+(ino/8), buf1);
+  getblk((u16)iblk+(ino/8), buf1);
   ip = (INODE *)buf1 + (ino % 8);
 
   getblk((u16)ip->i_block[12], buf2);
