@@ -34,22 +34,22 @@ UART *up;
 
 int main()
 {
-   char c, *p;
-   int mode;
-   uart_init();
-   up = &uart[0];
+  char c, *p;
+  int mode;
+  uart_init();
+  up = &uart[0];
 
-   mode = 0;
-   fbuf_init(mode);
+  mode = 0;
+  fbuf_init(mode);
 
-   p = &_binary_wsu_bmp_start;
-   show_bmp(p, 0, 0); 
+  p = &_binary_wsu_bmp_start;
+  show_bmp(p, 0, 0); 
 
-   while(1){
-     uprintf("enter a key from this UART : ");
-     ugetc(up);
-     p = &_binary_wsu_bmp_start;
-     show_bmp(p, 0, 0);
-   }
-   while(1);   // loop here  
+  while(1){
+    uprintf("enter a key from this UART : ");
+    ugetc(up);
+    p = &_binary_wsu_bmp_start;
+    show_bmp(p, 0, 0);
+  }
+  while(1);   // loop here  
 }

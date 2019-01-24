@@ -365,10 +365,10 @@ int show_bmp(char *p, int startRow, int startCol)
    for (i=startRow; i<h+startRow; i += 1){
      pp = p;
      for (j=startCol; j<startCol+w; j+=1){
-         b = *pp; g = *(pp+1); r = *(pp+2);
-         pixel = (b<<16) + (g<<8) + r;
-	 fb[i*640 + j] = pixel;
-         pp += 3;    // back pp by 3 bytes
+        b = *pp; g = *(pp+1); r = *(pp+2);
+        pixel = (b<<16) + (g<<8) + r;
+        fb[i*640 + j] = pixel;
+        pp += 3;    // back pp by 3 bytes
      }
      p -= r2;
    }

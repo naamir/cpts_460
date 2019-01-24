@@ -19,12 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RXFE 0x10
 #define TXFF 0x20
 
+typedef unsigned int u32;
+
 typedef struct uart{
   char *base;
   int n;
 }UART;
 
 UART uart[4];
+char *ctable = "0123456789ABCDEF";
+int  BASE = 10;
 
 int uart_init()
 {
@@ -66,3 +70,104 @@ int uprints(UART *up, char *s)
 }
 
 /** WRITE YOUR uprintf(UART *up, char *fmt, . . .) for formatted print **/
+int rpu(UART *up, u32 x)
+{  
+    char c;
+    if (x){
+       c = ctable[x % BASE];
+       rpu(up, x / BASE);
+       uputc(up, c);
+    }
+}
+
+int printu(UART *up, u32 x)
+{
+  BASE = 10;
+  (x==0)? uputc(up, '0') : rpu(up, x);
+  //uputc(up, ' ');
+  //uputc(up, '\n');
+}
+
+int prints(UART *up, char *s)
+{
+  while(*s != '\0')
+    {
+      uputc(up, *s);
+      s++;
+    }
+    //uputc(up, ' ');
+    //uputc(up, '\n');
+}
+
+int printd(UART *up, int x)
+{
+  BASE = 10;
+  if (x<0)
+    uputc(up, '-');
+  
+  (x==0)? uputc(up, '0') : rpu(up, x);
+  //uputc(up, ' ');
+  //uputc(up, '\n');
+}
+
+int printx(UART *up, u32 x)
+{
+  BASE = 16;
+  uputc(up, '0');
+  uputc(up, 'x');
+  (x==0)? uputc(up, '0') : rpu(up, x);
+  //uputc(up, ' ');
+  //uputc(up, '\n');
+}
+
+int printo(UART *up, u32 x)
+{
+  BASE = 8;
+  uputc(up, '0');
+  (x==0)? uputc(up, '0') : rpu(up, x);
+  //uputc(up, ' ');
+  //uputc(up, '\n');
+}
+
+int fuprintf(UART *up, char *fmt, ...)
+{
+  char *cp;
+  int *ip;
+
+  cp = fmt;
+  ip = &fmt + 1 ;
+  
+  while(*cp != '\0')
+    {  
+      if (*cp == '%')
+      {
+        cp++;
+        switch(*cp)
+          {
+            case 'c':
+              uputc(up, *ip);
+              break;
+            case 's':
+              prints(up, *ip);
+              break;
+            case 'u':
+              printu(up, *ip);
+              break;
+            case 'd':
+              printd(up, *ip);
+              break;
+            case 'o':
+              printo(up, *ip);
+              break;
+            case 'x':
+              printx(up, *ip);
+              break;
+            default:
+              prints(up, "bad type");
+          }
+        ip++;	  
+      }
+      else
+	      cp++;
+    }
+}

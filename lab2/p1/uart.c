@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RXFE 0x10
 #define TXFF 0x20
 
+typedef unsigned int u32;
+
 typedef struct uart{
   char *base;
   int n;
