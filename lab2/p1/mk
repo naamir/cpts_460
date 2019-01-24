@@ -19,6 +19,9 @@ arm-none-eabi-ld -T t.ld -L $LIBPATH ts.o t.o -o t.elf -lgcc #-lstr
 arm-none-eabi-objcopy -O binary t.elf t.bin
 #converts the ELF file to an executable bin file
 
+#print ELF file
+arm-none-eabi-readelf -a t.elf
+
 rm *.o *.elf
 
 echo ready to go?
