@@ -40,7 +40,7 @@ unsigned char *font;
 int row, col, scrow_row = 4;
 int WIDTH = 640;
 
-extern uprintf(char *fmt, ...);  // write this in YOUR uart.c file
+extern fuprintf(UART *up, char *fmt, ...);  // write this in YOUR uart.c file
 
 int fbuf_init()
 {
@@ -343,34 +343,42 @@ int kprintf(char *fmt,...)
   }
 }
 
-int show_bmp(char *p, int startRow, int startCol)
+int show_bmp(UART *up, char *p, int startRow, int startCol)
 { 
-   int h, w, pixel, r1, r2, i, j; 
-   unsigned char r, g, b;
-   char *pp;
- 
-   int *q = (int *)(p+14); // skip over 14 bytes file header 
-   q++;                    // skip 4 bytes in image header
-   w = *q;                 // width in pixels 
-   h = *(q + 1);           // height in pixels
+  int h, w, pixel, r1, r2, i, j; 
+  unsigned char r, g, b;
+  char *pp;
 
-   p += 54;                // p point at pixels now 
+  int *q = (int *)(p+14); // skip over 14 bytes file header 
+  q++;                    // skip 4 bytes in image header
+  w = *q;                 // width in pixels 
+  h = *(q + 1);           // height in pixels
 
-   // but the picture is up-side DOWN
+  p += 54;                // p point at pixels now 
 
-   r1 = 3*w;
-   r2 = 4*((3*w+3)/4);     // row size is a multiple of 4 bytes  
-   p += (h-1)*r2;
+  // but the picture is up-side DOWN
 
-   for (i=startRow; i<h+startRow; i += 1){
-     pp = p;
-     for (j=startCol; j<startCol+w; j+=1){
-        b = *pp; g = *(pp+1); r = *(pp+2);
-        pixel = (b<<16) + (g<<8) + r;
-        fb[i*640 + j] = pixel;
-        pp += 3;    // back pp by 3 bytes
-     }
-     p -= r2;
-   }
-   uprintf("\nBMP image height=%d width=%d\n", h, w);
+  r1 = 3*w;
+  r2 = 4*((3*w+3)/4);     // row size is a multiple of 4 bytes  
+  p += (h-1)*r2;
+
+  for (i=startRow; i<h+startRow; i+=1){ // i<h+startRow
+    pp = p;
+    for (j=startCol; j<startCol+w; j+=1){ // j<startCol+w
+      b = *pp; g = *(pp+1); r = *(pp+2);
+      pixel = (b<<16) + (g<<8) + r;
+      fb[i*640 + j] = pixel;
+      pp += 2*3;    // back pp by 3 bytes
+      // changed to 6 to drop pixels to show by half horizontally
+    }
+    p -= 2*r2;
+    // decrement by twice the row size to scratch alternate rows
+  }
+  //fuprintf(up, "\nBMP image height=%d width=%d\n", h, w);
+  fuprintf(up, "%s", "height:");
+  fuprintf(up, "%d", h);
+  fuprintf(up, "%s", "\n");
+  fuprintf(up, "%s", "width:");
+  fuprintf(up, "%d", w);
+  fuprintf(up, "%s", "\n");
 }
