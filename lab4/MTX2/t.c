@@ -7,11 +7,11 @@ PROC proc[NPROC];      // NPROC PROCs
 PROC *freeList;        // freeList of PROCs 
 PROC *readyQueue;      // priority queue of READY procs
 PROC *running;         // current running proc pointer
-
 PROC *sleepList;       // list of SLEEP procs
 
 #include "queue.c"     // include queue.c file
 #include "wait.c"      // include wait.c file
+#include "tree.c"
 
 /*******************************************************
   kfork() creates a child process; returns child pid.
@@ -35,7 +35,6 @@ int init()
   proc[NPROC-1].next = 0;  
   freeList = &proc[0];     // all PROCs in freeList     
   readyQueue = 0;          // readyQueue = empty
-
   sleepList = 0;           // sleepList = empty
   
   // create P0 as the initial running process
@@ -98,6 +97,7 @@ int body()   // process body function
     printf("***************************************\n");
     printf("proc %d running: parent=%d\n", running->pid,running->ppid);
     printList("readyQueue", readyQueue);
+    printChildren("childList", running);
     printSleep("sleepList ", sleepList);
     
     menu();
@@ -144,6 +144,7 @@ int kfork()
   p->kstack[SSIZE-1] = (int)body;    // retPC -> body()
   p->ksp = &(p->kstack[SSIZE - 9]);  // PROC.ksp -> saved eflag 
   enqueue(&readyQueue, p);           // enter p into readyQueue
+  insertChild(running, p);
   return p->pid;
 }
 

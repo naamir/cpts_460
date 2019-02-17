@@ -36,6 +36,7 @@ int kexit(int exitValue)
   printf("proc %d in kexit(), value=%d\n", running->pid, exitValue);
   running->exitCode = exitValue;
   running->status = ZOMBIE;
+  removeChild(running);
   tswitch();
 }
 

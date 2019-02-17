@@ -9,7 +9,8 @@
 #define ZOMBIE   3
 
 typedef struct proc{
-    struct proc *next;      // next proc pointer       
+    struct proc *next;      // next proc pointer      
+    struct proc *child;     // child proc of current process 
     int  *ksp;              // saved sp: at byte offset 4
   
     int   pid;              // process ID
