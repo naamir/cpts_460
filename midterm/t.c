@@ -190,6 +190,7 @@ int kfork(int func)
   p->kstack[SSIZE-1] = (int)func;  // saved lr -> body()
   p->ksp = &(p->kstack[SSIZE-14]); // saved ksp -> -14 entry in kstack
   enqueue(&readyQueue, p);
+  printList("readyQueue", readyQueue);
   insertChild(running, p);
   return p->pid;
 }
@@ -262,7 +263,7 @@ int main()
 
   printQ(readyQueue);
   // kfork P1 into readyQueue  
-  kfork(INIT); // for into INIT for actual midterm
+  kfork(body); // for into INIT for actual midterm
 
   unlock();
   while(1){

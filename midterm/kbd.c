@@ -73,7 +73,8 @@ int kbd_init()
   shifted = 0;
   release = 0;
   control = 0;
-
+  keyset = 2;
+/*
   printf("Detect KBD scan code: press the ENTER key : ");
   while( (*(kp->base + KSTAT) & 0x10) == 0);
   scode = *(kp->base + KDATA);
@@ -81,6 +82,7 @@ int kbd_init()
   if (scode==0x5A)
     keyset=2;
   printf("keyset=%d\n", keyset);
+  */
 }
 
 // kbd_handler1() for scan code set 1
@@ -126,7 +128,7 @@ void kbd_handler2()
   char c;
   char scode = *(kb->base + KDATA);
 
-  
+  printf("scan code = %x ", scode);
   if (scode == 0xF0){       // key release 
     release = 1;           // set flag
     //shifted = 0;
@@ -162,7 +164,7 @@ void kbd_handler()
     kbd_handler2();
 }
 
-int kgetc()
+/*int kgetc()
 {
   char c;
   KBD *kp = &kbd;
@@ -177,8 +179,8 @@ int kgetc()
   
   return c;
 }
+*/
 
-/*
 int kgetc()
 {
   char c;
@@ -202,7 +204,7 @@ int kgetc()
   }
 
 }
-*/
+
 int kgets(char s[ ])
 {
   char c;
