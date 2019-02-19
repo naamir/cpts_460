@@ -31,17 +31,40 @@ int removeChild(PROC *rproc)
    return 0;
 }
 
+int updateChildrenppid(PROC *p)
+{
+   int rppid = p->pid;
+   PROC *c = p->child;
+
+   if (c) {
+      c->ppid = rppid;
+      while (c->sibling) {
+         c->sibling->ppid = rppid;
+         c = c->sibling;
+      }
+   }
+   else {
+      printf("no Childrem!\n");
+      return 0;
+   }
+}
+
 int helpOrphans(PROC *rproc)
 {
    // need to make the children of ZOMBIE proc (if any) children of Proc 1
+   int i=0;
    PROC *c = rproc->child;
+   PROC *p1;
+
    if (c) {
-      if (readyQueue[1].pid == 1) // see if proc 1 is the 2nd element of readyQueue
-         insertChild(&readyQueue[1], c); // add child to Proc 1
-      else {
-         kprintf("proc 1 running, can't assign children\n");
-         return 0;
+      for (i=0; i < NPROC; i++) {
+         if (readyQueue[i].pid == 1) {// find proc 1
+            p1 = &readyQueue[i];
+            break;
+         }
       }
+      insertChild(p1, c); // add child to Proc 1
+      updateChildrenppid(p1);
    }
 }
 
