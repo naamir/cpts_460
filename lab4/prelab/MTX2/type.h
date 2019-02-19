@@ -7,6 +7,7 @@
 #define READY    1
 #define SLEEP    2
 #define ZOMBIE   3
+#define BLOCK    4
 
 typedef struct proc{
     struct proc *next;      // next proc pointer       
@@ -26,3 +27,8 @@ typedef struct proc{
 
     int   kstack[1024];     // process stack                 
 }PROC;
+
+typedef struct semaphore{
+    int value;              // counter for no. of procs waiting for CR
+    PROC *queue;            // FIFO queue for BLOCKED processes
+}SEMAPHORE;

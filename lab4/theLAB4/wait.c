@@ -1,7 +1,8 @@
 int tswitch();
 
-int sleep(int event)
+int ksleep(int event)
 {
+  int sr = int_off();
   printf("proc %d going to sleep on event=%d\n", running->pid, event);
 
   running->event = event;
@@ -9,12 +10,15 @@ int sleep(int event)
   enqueue(&sleepList, running);
   printList("sleepList", sleepList);
   tswitch();
+  int_on(sr);
 }
 
-int wakeup(int event)
+int kwakeup(int event)
 {
   PROC *temp, *p;
   temp = 0;
+  int sr = int_off();
+  
   printList("sleepList", sleepList);
 
   while (p = dequeue(&sleepList)){
@@ -29,6 +33,7 @@ int wakeup(int event)
   }
   sleepList = temp;
   printList("sleepList", sleepList);
+  int_on(sr);
 }
 
 int kexit(int exitValue)
@@ -36,7 +41,6 @@ int kexit(int exitValue)
   printf("proc %d in kexit(), value=%d\n", running->pid, exitValue);
   running->exitCode = exitValue;
   running->status = ZOMBIE;
-  removeChild(running);
   tswitch();
 }
 
