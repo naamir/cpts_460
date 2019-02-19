@@ -16,7 +16,7 @@ int show_pipe()
   printf("----------------------------------------\n");
   printf("room=%d data=%d buf=", p->room, p->data);
   for (i=0; i<p->data; i++)
-    putchar(p->buf[p->tail+i]);
+    kputc(p->buf[p->tail+i]);
   printf("\n");
   printf("----------------------------------------\n");
 }
@@ -69,15 +69,15 @@ int write_pipe(PIPE *p, char *buf, int n)
   while (n){
     printf("writer %d writing pipe\n", running->pid);
     while (p->room){
-       p->buf[p->head++] = *buf; 
-       p->head  %= PSIZE;
-       buf++;  ret++; 
-       p->data++; p->room--; n--;
-       if (n<=0){
-         show_pipe();
-	 kwakeup(&p->data);
-	 return ret;
-       }
+      p->buf[p->head++] = *buf; 
+      p->head  %= PSIZE;
+      buf++;  ret++; 
+      p->data++; p->room--; n--;
+      if (n<=0){
+        show_pipe();
+        kwakeup(&p->data);
+        return ret;
+      }
     }
     show_pipe();
     printf("writer %d sleep for room\n", running->pid);
@@ -95,7 +95,8 @@ int pipe_reader()
  
   while(1){
     printf("input nbytes to read : " );
-    scanf("%d", &nbytes); getchar();
+    //scanf("%d", &nbytes); 
+    kgetc();
     n = read_pipe(p, line, nbytes);
     line[n] = 0;
     printf("Read n=%d bytes : line=%s\n", n, line);
@@ -113,7 +114,7 @@ int pipe_writer()
   while(1){
     printf("input a string to write : " );
 
-    kgets(line, 128, stdin);
+    kgets(line);
     line[strlen(line)-1] = 0;
 
     if (strcmp(line, "")==0)

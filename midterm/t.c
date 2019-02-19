@@ -22,7 +22,7 @@ char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCK"};
 #include "queue.c"
 #include "tree.c"
 #include "wait.c"      // include wait.c file
-//#include "pipe.c"
+#include "pipe.c"
 
 /*******************************************************
   kfork() creates a child process; returns child pid.
@@ -143,7 +143,7 @@ int body()   // process body function
       do_wait();
   }
 }
-/*
+
 int INIT()
 {
   int pid, status;
@@ -162,7 +162,7 @@ int INIT()
     printf("P1 buried a ZOMBIE child %d\n", pid);
   }
 }
-*/
+/**/
 int kfork(int func)
 {
   int i;
@@ -262,7 +262,7 @@ int main()
 
   printQ(readyQueue);
   // kfork P1 into readyQueue  
-  kfork(body); // for into INIT for actual midterm
+  kfork(INIT); // for into INIT for actual midterm
 
   unlock();
   while(1){
