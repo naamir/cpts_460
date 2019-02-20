@@ -59,7 +59,7 @@ extern int color;
 int kbd_init()
 {
   char scode;
-  keyset = 1; // default to scan code set-1
+  //keyset = 1; // default to scan code set-1
   
   KBD *kp = &kbd;
   kp->base = (char *)0x10006000;
@@ -73,7 +73,7 @@ int kbd_init()
   shifted = 0;
   release = 0;
   control = 0;
-  keyset = 2;
+  keyset = 2; // force keyset to be 2
 /*
   printf("Detect KBD scan code: press the ENTER key : ");
   while( (*(kp->base + KSTAT) & 0x10) == 0);
@@ -128,7 +128,7 @@ void kbd_handler2()
   char c;
   char scode = *(kb->base + KDATA);
 
-  printf("scan code = %x ", scode);
+  //printf("scan code = %x ", scode);
   if (scode == 0xF0){       // key release 
     release = 1;           // set flag
     //shifted = 0;
@@ -195,13 +195,16 @@ int kgetc()
       // once the kbd handler wakes up this proc it'll start from here
       // and realize that data != 0
     }
-    
-    c = kb->buf[kb->tail++];  // get a char and update tail
-    kb->tail %= KBUFSIZE;      // remember kbd is a circular buffer
-    kb->data--;
-    unlock();   // enable IRQs, redundant if the proc was asleep
-    return c;
+    else 
+      break;
   }
+
+  c = kb->buf[kb->tail++];  // get a char and update tail
+  kb->tail %= KBUFSIZE;      // remember kbd is a circular buffer
+  kb->data--;
+  unlock();   // enable IRQs, redundant if the proc was asleep
+  return c;
+
 
 }
 
