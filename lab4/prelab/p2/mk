@@ -1,5 +1,4 @@
 rm a.out
 gcc -m32 t.c ts.s
 ls -l a.out
-chmod +x a.out
-./a.out
+a.out

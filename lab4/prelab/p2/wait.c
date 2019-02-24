@@ -1,29 +1,25 @@
 int tswitch();
 
-int ksleep(int event)
+int sleep(int event)
 {
-  int sr = int_off();
-  //printf("proc %d going to sleep on event=%d\n", running->pid, event);
+  printf("proc %d going to sleep on event=%d\n", running->pid, event);
 
   running->event = event;
   running->status = SLEEP;
   enqueue(&sleepList, running);
-  //printList("sleepList", sleepList);
+  printList("sleepList", sleepList);
   tswitch();
-  int_on(sr);
 }
 
-int kwakeup(int event)
+int wakeup(int event)
 {
   PROC *temp, *p;
   temp = 0;
-  int sr = int_off();
-  
-  //printList("sleepList", sleepList);
+  printList("sleepList", sleepList);
 
   while (p = dequeue(&sleepList)){
     if (p->event == event){
-      //printf("wakeup %d\n", p->pid);
+      printf("wakeup %d\n", p->pid);
       p->status = READY;
       enqueue(&readyQueue, p);
     }
@@ -32,22 +28,10 @@ int kwakeup(int event)
     }
   }
   sleepList = temp;
-  //printList("sleepList", sleepList);
-  int_on(sr);
+  printList("sleepList", sleepList);
 }
 
-int kexit(int exitValue)
-{
-  printf("proc %d in kexit(), value=%d\n", running->pid, exitValue);
-  running->exitCode = exitValue;
-  running->status = ZOMBIE;
-  // assign children to P1 before removing proc as the child of 
-  // parent
-  helpOrphans(running); 
-  tswitch();
-}
-
-int kwait(PROC *rproc)
+int wait(PROC *rproc)
 {
   PROC *c;
   printf("proc %d waits for a ZOMBIE child\n", rproc->pid);
@@ -60,9 +44,20 @@ int kwait(PROC *rproc)
   }
   else {
     printf("no children found to bury hence sleep\n");
-    ksleep(rproc); // sleep on its own address if no child is a ZOMBIE
+    sleep(rproc); // sleep on its own address if no child is a ZOMBIE
     return 0;
   }
 }
+
+int kexit(int exitValue)
+{
+  printf("proc %d in kexit(), value=%d\n", running->pid, exitValue);
+  running->exitCode = exitValue;
+  running->status = ZOMBIE;
+  helpOrphans(running); // assign children to P1 before removing proc as the child of parent
+  
+  tswitch();
+}
+
 
   

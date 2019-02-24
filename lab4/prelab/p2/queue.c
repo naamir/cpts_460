@@ -29,3 +29,13 @@ int printList(char *name, PROC *p)
   }
   printf("NULL\n");
 }
+
+int printSleep(char *name, PROC *p) 
+{
+  printf("%s = ", name);
+  while(p){
+     printf("[%d event=%d]->", p->pid, p->event);
+     p = p->next;
+  }
+  printf("NULL\n");
+}

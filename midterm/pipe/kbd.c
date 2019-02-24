@@ -153,7 +153,7 @@ void kbd_handler2()
   kb->buf[kb->head++] = c;  // enter key into cirular buf
   kb->head %= KBUFSIZE;
   kb->data++;
-  kwakeup(&kb->data);
+  //kwakeup(&kb->data);
 }
 
 void kbd_handler()
@@ -164,7 +164,7 @@ void kbd_handler()
     kbd_handler2();
 }
 
-/*int kgetc()
+int kgetc()
 {
   char c;
   KBD *kp = &kbd;
@@ -179,8 +179,8 @@ void kbd_handler()
   
   return c;
 }
-*/
 
+/*
 int kgetc()
 {
   char c;
@@ -207,7 +207,7 @@ int kgetc()
 
 
 }
-
+*/
 int kgets(char s[ ])
 {
   char c;

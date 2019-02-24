@@ -9,11 +9,11 @@ SAVE:	  pushl %eax
 	  pushl %esi
 	  pushl %edi
           pushfl
-          movl   running, %ebx   # ebx -> PROC
-          movl   %esp, 4(%ebx)   # PORC.save_sp = esp
-FIND:	  call   scheduler       # call scheduler() in C
-RESUME:   movl   running, %ebx   # ebx -> PROC
-          movl   4(%ebx), %esp   # esp = PROC>saved_sp
+          movl   running,%ebx   # ebx -> PROC
+          movl   %esp,4(%ebx)   # PORC.save_sp = esp
+FIND:	  call   scheduler
+RESUME:   movl   running,%ebx   # ebx -> PROC
+          movl   4(%ebx),%esp   # esp = PROC>saved_sp
           popfl
 	  popl  %edi
           popl  %esi
@@ -22,7 +22,6 @@ RESUME:   movl   running, %ebx   # ebx -> PROC
           popl  %ecx
           popl  %ebx
           popl  %eax
-
 	  ret
 # stack contents = |retPC|eax|ebx|ecx|edx|ebp|esi|edi|eflag|
 #                    -1   -2  -3  -4  -5  -6  -7  -8   -9

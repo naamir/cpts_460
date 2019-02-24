@@ -18,10 +18,13 @@ int procsize = sizeof(PROC);
 #include "exceptions.c"
 
 char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCK"};
+// the buffer for P V semaphore
+BUFFER buffer;
 
 #include "queue.c"
 #include "tree.c"
 #include "wait.c"      // include wait.c file
+#include "pv.c"
 #include "pipe.c"
 
 /*******************************************************
@@ -148,10 +151,11 @@ int INIT()
 {
   int pid, status;
   PIPE *p = &pipe;
+  
   printf("P1 running: create pipe and writer reader processes\n");
   kpipe();
-  kfork(pipe_writer);
-  kfork(pipe_reader);
+  kfork(pipe_writer);  // producer
+  kfork(pipe_reader);  // consumer
   printf("P1 waits for ZOMBIE child\n");
   while(1){
     pid = kwait(&status);
@@ -254,6 +258,8 @@ int main()
   
   /* enable SIC interrupts */
   VIC_INTENABLE |= (1<<31); // SIC to VIC's IRQ31
+  VIC_INTENABLE |= (1<<4);  // timer0,1 at VIC.bit4
+  VIC_INTENABLE |= (1<<5);  // timer2,3 at VIC.bit5
   /* enable KBD IRQ */
   SIC_INTENABLE = (1<<3); // KBD int=bit3 on SIC
   SIC_ENSET = (1<<3);  // KBD int=3 on SIC
@@ -263,7 +269,7 @@ int main()
 
   printQ(readyQueue);
   // kfork P1 into readyQueue  
-  kfork(body); // for into INIT for actual midterm
+  kfork(INIT); // for into INIT for actual midterm
 
   unlock();
   while(1){
