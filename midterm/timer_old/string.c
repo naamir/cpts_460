@@ -50,13 +50,12 @@ int atoi(char *s)
     v = 10*v + (*s - '0');
     s++;
   }
-  kprintf("v=%d\n", v);
+  //kprintf("v=%d\n", v);
   return v;
 }
 int geti()
 {
   char s[16];
   kgets(s);
-  if(s[0] == '\r') return 0;
   return atoi(s);
 }
