@@ -13,6 +13,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************/
+#ifndef  STRING
+#define  STRING
 
 int kprintf(char *, ...);
 int strlen(char *s)
@@ -50,7 +52,7 @@ int atoi(char *s)
     v = 10*v + (*s - '0');
     s++;
   }
-  kprintf("v=%d\n", v);
+  //kprintf("v=%d\n", v);
   return v;
 }
 int geti()
@@ -60,3 +62,5 @@ int geti()
   if(s[0] == '\r') return 0;
   return atoi(s);
 }
+
+#endif

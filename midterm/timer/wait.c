@@ -4,11 +4,11 @@ int ksleep(int event)
 {
   int sr = int_off();
   //printf("proc %d going to sleep on event=%d\n", running->pid, event);
-
+  printf("event %d\n", event);
   running->event = event;
   running->status = SLEEP;
   enqueue(&sleepList, running);
-  //printList("sleepList", sleepList);
+  printList("sleepList", sleepList);
   tswitch();
   int_on(sr);
 }
@@ -20,17 +20,19 @@ int kwakeup(int event)
   int sr = int_off();
   
   //printList("sleepList", sleepList);
-
+  printf("event %d\n", event);
   while (p = dequeue(&sleepList)){
     if (p->event == event){
       //printf("wakeup %d\n", p->pid);
       p->status = READY;
       enqueue(&readyQueue, p);
+      printf("Kwakeup %d\n", p->pid);
     }
     else{
       enqueue(&temp, p);
     }
   }
+  
   sleepList = temp;
   //printList("sleepList", sleepList);
   int_on(sr);

@@ -14,7 +14,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************/
 
-// defines.h file
+#ifndef  TYPE
+#define  TYPE
 
 typedef unsigned char  u8;
 typedef unsigned short u16;
@@ -61,6 +62,7 @@ typedef unsigned int   u32;
 
 #define BSIZE    8          // buffer size for pipe
 #define NPROC    9          // number of PROCs
+#define NTQE     9
 #define SSIZE 1024          // stack size = 4KB
 
 // PROC status
@@ -87,16 +89,31 @@ typedef struct proc{
     struct proc *parent;    // parent PROC pointer       
 
     int   kstack[1024];     // process stack                 
-}PROC;
+} PROC;
 
 typedef struct semaphore{
   int value;
   PROC *queue;
-}SEMAPHORE;
+} SEMAPHORE;
 
 typedef struct buffer{
   char buf[BSIZE];
   int head, tail;
   struct semaphore data, room;
   struct semaphore mutex;
-}BUFFER;
+} BUFFER;
+
+typedef volatile struct timer{
+	unsigned int *base;
+	int tick, hh, mm, ss;
+	char clock[16];
+} TIMER;
+
+typedef struct tqe {
+	struct tqe *next;
+	int seconds;
+	int event;
+	PROC *p;
+} TQE;
+
+#endif

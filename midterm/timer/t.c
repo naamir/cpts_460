@@ -21,11 +21,16 @@ char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCK"};
 // the buffer for P V semaphore
 BUFFER buffer;
 
+TQE timerq[NTQE];
+TQE *timerq_free_list;
+TQE *timerq_list;
+volatile TIMER timer;
+
 #include "queue.c"
 #include "tree.c"
 #include "wait.c"      // include wait.c file
 //#include "pv.c"
-#include "pipe.c"
+#include "timer.c"
 
 /*******************************************************
   kfork() creates a child process; returns child pid.
@@ -58,6 +63,10 @@ void IRQ_handler()
     if (sicstatus & 0x08){
       kbd_handler();
     }
+  }
+  if (vicstatus & (1<<4)) {
+    if (*(timer.base+TVALUE) == 0)
+      timer_handler();
   }
 }
 
@@ -92,29 +101,6 @@ int init()
   printf("init complete: P0 running\n"); 
 }
 
-int INIT()
-{
-  //int pid, status;
-  PIPE *p = &pipe;
-  
-  printf("P1 running: create pipe and writer reader processes\n");
-  kpipe();
-  kfork(pipe_writer);  // producer
-  kfork(pipe_reader);  // consumer
-
-  /*
-  printf("P1 waits for ZOMBIE child\n");
-  while(1){
-    pid = kwait(&status);
-    if (pid < 0){
-      printf("no more child, P1 loops\n");
-      while(1);
-    }
-    printf("P1 buried a ZOMBIE child %d\n", pid);
-  }
-  */
-}
-
 int kfork(int func)
 {
   int i;
@@ -142,8 +128,8 @@ int kfork(int func)
   p->kstack[SSIZE-1] = (int)func;  // saved lr -> body()
   p->ksp = &(p->kstack[SSIZE-14]); // saved ksp -> -14 entry in kstack
   enqueue(&readyQueue, p);
-  printList("readyQueue", readyQueue);
   insertChild(running, p);
+  printf("Proc %d forked new Proc %d\n", running->pid, p->pid);
   return p->pid;
 }
 
@@ -170,10 +156,23 @@ int main()
   *(kp->base+KCNTL) = 0x12;
 
   init();
+  timer_init();
+  tqe_init();
 
   printQ(readyQueue);
   // kfork P1 into readyQueue  
-  INIT(); //kfork(body); // for into INIT for actual midterm
+  //INIT(); //kfork(body); // for into INIT for actual midterm
+
+  printf("P0 running: create pipe and writer reader processes\n");
+
+  timer_start();
+
+  kfork(timer_task);
+  kfork(timer_task);
+  kfork(timer_task);
+  kfork(timer_task);
+
+  printQ(readyQueue);
 
   unlock();
   while(1){
@@ -192,5 +191,3 @@ int scheduler()
   running = dequeue(&readyQueue);
   //kprintf("next running = %d\n", running->pid);  
 }
-
-
