@@ -14,7 +14,7 @@ int show_pipe()
   PIPE *p = &pipe;
   int i;
   printf("----------------------------------------\n");
-  printf("room=%d data=%d buf=", p->room, p->data);
+  printf("room=%d data=%d buf=%s", p->room, p->data, p->buf);
   for (i=0; i<p->data; i++)
     kputc(p->buf[p->tail+i]);
   printf("\n");
@@ -49,19 +49,15 @@ int read_pipe(PIPE *p, char *buf, int n)
             break;
     }
     show_pipe();
-    if (p->data == 0) {
-      printf("reader has read everything! scram\n");
-      return 0;
-    }
-    if (ret){ /* has read something */
+    if (ret){   /* has read something */
        kwakeup(&p->room);
        return ret;
     }
     // pipe has no data
-    //printf("reader %d sleep for data\n", running->pid);
-    //kwakeup(&p->room);
-    //ksleep(&p->data);
-    //continue;
+    printf("reader %d sleep for data\n", running->pid);
+    kwakeup(&p->room);
+    ksleep(&p->data);
+    continue;
   }
 }
 
@@ -77,11 +73,13 @@ int write_pipe(PIPE *p, char *buf, int n)
       p->head  %= PSIZE;
       buf++;  ret++; 
       p->data++; p->room--; n--;
+      /*
       if (n<=0){
         show_pipe();
         kwakeup(&p->data);
         return ret;
       }
+      */
     }
     show_pipe();
     printf("writer %d sleep for room\n", running->pid);
@@ -96,60 +94,41 @@ int pipe_reader()
   int nbytes, n, iline;
   PIPE *p = &pipe;
   printf("proc %d as pipe reader\n", running->pid);
-
+ 
   while(1){
     printf("input nbytes to read : " );
     //scanf("%d", &nbytes);
     //kgets(line);
     //line[strlen(line)] = 0;
     iline = geti();
-    printf("nbts:%d\n", iline);
-    if (iline == 0) {
-      kwakeup(&p->room);
-      kexit(&running);
-    }
+
+    if (strcmp(iline, "\r") == 0)
+       kexit(&running);
 
     nbytes = iline;
-    
+    printf("nbts:%i\n", nbytes);
     n = read_pipe(p, line, nbytes);
     line[n] = 0;
     printf("Read n=%d bytes : line=%s\n", n, line);
   }
 }
 
-int checkReaders(PROC *p)
-{
-  int procCount = 0;
-  printQ(readyQueue);
-  while (p) {
-    procCount++;
-    p = p->next;
-  }
-  if (procCount <= 1) {
-    printf("we got ourselves a BROKEN PIPE!\n");
-    kexit(running);
-  }
-
-}
-
 int pipe_writer()
 {
   char line[128];
+  int test;
   int nbytes, n;
   PIPE *p = &pipe;
-
-  //if (!running->child)
-  checkReaders(readyQueue);
-  printQ(readyQueue);
   printf("proc %d as pipe writer\n", running->pid);
 
   while(1){
     printf("input a string to write or ENTER to exit: " );
-
+    test = geti();
+    printf("\n");
     kgets(line);
     line[strlen(line)] = 0;
     printf("line:%s\n", line);
-    if (line[0] == 0)
+    if (strcmp(line, "\r") == 0)
        kexit(&running);
     if (strcmp(line, "") == 0)
        continue;
@@ -157,9 +136,6 @@ int pipe_writer()
     nbytes = strlen(line);
     printf("nbytes=%d buf=%s\n", nbytes, line);
     n = write_pipe(p, line, nbytes);
-
-    checkReaders(readyQueue);
-
     printf("wrote n=%d bytes\n", n);
   }
 }

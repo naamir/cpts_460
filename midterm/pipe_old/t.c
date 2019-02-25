@@ -92,17 +92,70 @@ int init()
   printf("init complete: P0 running\n"); 
 }
 
+int menu()
+{
+  printf("****************************************\n");
+  printf(" ps fork switch exit sleep wakeup wait *\n");
+  printf("****************************************\n");
+}
+
+int do_ps()
+{
+  int i;
+  PROC *p;
+  printf("PID  PPID  status\n");
+  printf("---  ----  ------\n");
+  for (i=0; i<NPROC; i++){
+    p = &proc[i];
+    printf(" %d    %d    ", p->pid, p->ppid);
+    if (p == running)
+      printf("RUNNING\n");
+    else
+      printf("%s\n", status[p->status]);
+  }
+}
+    
+int body()   // process body function
+{
+  int c;
+  char cmd[64];
+  printf("proc %d starts from body()\n", running->pid);
+  while(1){
+    printf("***************************************\n");
+    printf("proc %d running: parent=%d    ", running->pid,running->ppid);
+    printChildren("childList", running);
+    printList("readyQueue", readyQueue);
+    printSleepList(sleepList);
+    menu();
+    printf("enter a command : ");
+    gets(cmd);
+    //kgetc();
+    if (strcmp(cmd, "ps")==0)
+      do_ps();
+    if (strcmp(cmd, "fork")==0)
+      do_kfork();
+    if (strcmp(cmd, "switch")==0)
+      do_switch();
+    if (strcmp(cmd, "exit")==0)
+      do_exit();
+    if (strcmp(cmd, "sleep")==0)
+      do_sleep();
+    if (strcmp(cmd, "wakeup")==0)
+      do_wakeup();
+    if (strcmp(cmd, "wait")==0)
+      do_wait();
+  }
+}
+
 int INIT()
 {
-  //int pid, status;
+  int pid, status;
   PIPE *p = &pipe;
   
-  printf("P1 running: create pipe and writer reader processes\n");
+  printf("P%d running: create pipe and writer reader processes\n", running->pid);
   kpipe();
   kfork(pipe_writer);  // producer
   kfork(pipe_reader);  // consumer
-
-  /*
   printf("P1 waits for ZOMBIE child\n");
   while(1){
     pid = kwait(&status);
@@ -112,9 +165,8 @@ int INIT()
     }
     printf("P1 buried a ZOMBIE child %d\n", pid);
   }
-  */
 }
-
+/**/
 int kfork(int func)
 {
   int i;
@@ -147,6 +199,50 @@ int kfork(int func)
   return p->pid;
 }
 
+int do_kfork()
+{
+   int child = kfork(body);
+   if (child < 0)
+      kprintf("kfork failed\n");
+   else{
+      kprintf("proc %d kforked a child = %d\n", running->pid, child); 
+      printList("readyQueue", readyQueue);
+   }
+   return child;
+}
+
+int do_switch()
+{
+   tswitch();
+}
+
+int do_exit()
+{
+  kexit(running->pid);  // exit with own PID value 
+}
+
+int do_sleep()
+{
+  
+  int event;
+  kprintf("enter an event value to sleep on : ");
+  event = geti();
+  ksleep(event);
+}
+
+int do_wakeup()
+{
+  int event;
+  kprintf("enter an event value to wakeup with : ");
+  event = geti();
+  kwakeup(event);
+}
+
+int do_wait()
+{
+  kwait(running);
+}
+
 int main()
 { 
   int i; 
@@ -169,15 +265,23 @@ int main()
   SIC_ENSET = (1<<3);  // KBD int=3 on SIC
   *(kp->base+KCNTL) = 0x12;
 
+  // P0 created here and is running
   init();
 
   printQ(readyQueue);
   // kfork P1 into readyQueue  
-  INIT(); //kfork(body); // for into INIT for actual midterm
-
+  kfork(body);
+/*
+  PIPE *p = &pipe;
+  
+  printf("P%d running: create pipe and writer reader processes\n", running->pid);
+  kpipe();
+  kfork(pipe_writer);  // producer
+  kfork(pipe_reader);  // consumer
+*/
   unlock();
   while(1){
-    if (readyQueue) 
+    if (readyQueue)
       tswitch();
   }
 }

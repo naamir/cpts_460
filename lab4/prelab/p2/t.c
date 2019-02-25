@@ -14,7 +14,7 @@ char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCKED"};
 
 #include "queue.c"     // include queue.c file
 #include "tree.c"
-//#include "semaphore.c"
+#include "pv.c"
 #include "wait.c"      // include wait.c file
 
 /*******************************************************
@@ -126,7 +126,28 @@ int body()   // process body function
   }
 }
 
-int kfork()
+int INIT()
+{
+  int pid, status;
+
+  printf("P1 running: create producer and consumer processes\n");
+
+  kfork(producer);
+  kfork(consumer);
+  /*
+  printf("P1 waits for ZOMBIE child\n");
+  while(1){
+    pid = wait();
+    if (pid < 0){
+      printf("no more child, P1 loops\n");
+      while(1);
+    }
+    printf("P1 buried a ZOMBIE child %d\n", pid);
+  }
+  */
+}
+
+int kfork(int func)
 {
   int  i;
   PROC *p = dequeue(&freeList);
@@ -145,16 +166,17 @@ int kfork()
   **********************************************************/
   for (i=1; i<10; i++)               // zero out kstack cells
       p->kstack[SSIZE - i] = 0;
-  p->kstack[SSIZE-1] = (int)body;    // retPC -> body()
+  p->kstack[SSIZE-1] = (int)func;    // retPC -> passed in function ptr
   p->ksp = &(p->kstack[SSIZE - 9]);  // PROC.ksp -> saved eflag 
   enqueue(&readyQueue, p);           // enter p into readyQueue
   insertChild(running, p);
+  printList("readyQueue", readyQueue);
   return p->pid;
 }
 
 int do_kfork()
 {
-   int child = kfork();
+   int child = kfork(body);
    if (child < 0)
       printf("kfork failed\n");
    else{
@@ -199,14 +221,15 @@ int do_wakeup()
 /*************** main() function ***************/
 int main()
 {
-   printf("Welcome to the MT Multitasking System\n");
-   init();    // initialize system; create and run P0
-   kfork();   // kfork P1 into readyQueue  
-   while(1){
-     printf("P0: switch process\n");
-     while (readyQueue == 0);
-         tswitch();
-   }
+  printf("Welcome to the MT Multitasking System\n");
+  init();    // initialize system; create and run P0
+  kfork(INIT);   // kfork P1 into readyQueue  
+    getchar();
+  while(1){
+    printf("P0: switch process\n");
+    while (readyQueue == 0);
+        tswitch();
+  }
 }
 
 /*********** scheduler *************/

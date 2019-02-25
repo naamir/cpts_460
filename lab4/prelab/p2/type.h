@@ -28,7 +28,9 @@ typedef struct proc{
     int   kstack[1024];     // process stack                 
 }PROC;
 
+/*
 typedef struct semaphore{
     int value;              // counter for no. of procs waiting for CR
     PROC *queue;            // FIFO queue for BLOCKED processes
 }SEMAPHORE;
+*/
