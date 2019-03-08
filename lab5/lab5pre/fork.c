@@ -110,7 +110,7 @@ PROC *kfork(char *filename)
   //  14 13 12 11 10 9  8  7  6  5  4   3    2   1 |             |
 
   enqueue(&readyQueue, p);
-
+  insertChild(running, p);
   kprintf("proc %d kforked a child %d: ", running->pid, p->pid); 
   printQ(readyQueue);
 

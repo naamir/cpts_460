@@ -88,6 +88,8 @@ typedef struct proc{
   int    pid;
   int    ppid;
   struct proc *parent;
+  struct proc *child;
+  struct proc *sibling;
   int    event;
   int    exitCode;
 

@@ -25,26 +25,32 @@ int ubody(char *name)
     uprintf("\n"); 
  
     if (strcmp(line, "getpid")==0)
-       ugetpid();
+      ugetpid();
     if (strcmp(line, "getppid")==0)
-       ugetppid();
+      ugetppid();
     if (strcmp(line, "ps")==0)
-       ups();
+      ups();
     if (strcmp(line, "chname")==0)
-       uchname();
+      uchname();
     if (strcmp(line, "switch")==0)
-       uswitch();
+      uswitch();
     if (strcmp(line, "fork")==0)
-       ufork();
+      ufork();
     if (strcmp(line, "sleep")==0)
-       usleep();
+      usleep();
+    if (strcmp(line, "wakeup")==0)
+      uwakeup();
+    if (strcmp(line, "wait")==0)
+      uwait();
+    if (strcmp(line, "exit")==0)
+      uexit();
   }
 }
 
 int ufork()
 {
   char s[32];
-  uprintf("input proc [e.g. u2] : ");
+  uprintf("input proc [u2, u3, u4] : ");
   ugetline(s);
   printf("\n");
   return syscall(5,s,0,0);
@@ -59,11 +65,30 @@ int usleep()
   return syscall(6,s,0,0);
 }
 
+int uwakeup()
+{
+  char s[32];
+  uprintf("enter the event value to wakeup : ");
+  ugetline(s);
+  printf("\n");
+  return syscall(9,s,0,0);
+}
+
+int uwait()
+{
+  return syscall(7,0,0,0);
+}
+
+int uexit()
+{
+  return syscall(8,0,0,0);
+}
+
 int umenu()
 {
-  uprintf("-----------------------------------------\n");
-  uprintf("getpid getppid ps chname switch fork sleep\n");
-  uprintf("-----------------------------------------\n");
+  uprintf("-----------------------------------------------------------\n");
+  uprintf("getpid getppid ps chname switch fork sleep wakeup wait exit\n");
+  uprintf("-----------------------------------------------------------\n");
 }
 
 int getpid()

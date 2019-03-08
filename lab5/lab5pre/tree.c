@@ -1,6 +1,7 @@
 /***************** tree.c file **************
 Implementing the tree structure for processes
 *********************************************/
+#define NULL 0
 
 int insertChild(PROC *rproc, PROC *fc)  // rproc->running process , fc->forked child
 {

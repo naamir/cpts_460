@@ -30,6 +30,9 @@ int color;
 #include "queue.c"
 #include "kernel.c"
 #include "fork.c"
+
+char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCK"};
+#include "tree.c"
 #include "svc.c"
 
 #include "sdc.c"
