@@ -18,7 +18,7 @@ int ubody(char *name)
   ppid = getppid();
 
   while(1){
-    printf("This is process #%d in Umode at %x parent=%d\n", pid, getPA(),ppid);
+    printf("This is process #%d in WHAAA Umode at %x parent=%d\n", pid, getPA(),ppid);
     umenu();
     printf("input a command : ");
     ugetline(line); 
@@ -41,7 +41,7 @@ int ubody(char *name)
 int umenu()
 {
   uprintf("-------------------------------\n");
-  uprintf("getpid getppid ps chname switch\n");
+  uprintf("getpid getppid ps chname switch wazaaaa\n");
   uprintf("-------------------------------\n");
 }
 
