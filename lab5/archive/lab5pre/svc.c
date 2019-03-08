@@ -62,32 +62,20 @@ int svc_handler(int a, int b, int c, int d)
   int r; 
 
   switch(a){
-    case 0: r = kgetpid();          break;
-    case 1: r = kgetppid();         break;
-    case 2: r = kps();              break;
-    case 3: r = kchname((char *)b); break;
-    case 4: r = ktswitch();         break;
-    case 5: r = kfork((char *)b);   break;
-    case 6: r = ksleep((int *)b);   break;
+     case 0: r = kgetpid();          break;
+     case 1: r = kgetppid();         break;
+     case 2: r = kps();              break;
+     case 3: r = kchname((char *)b); break;
+     case 4: r = ktswitch();         break;
+//     case 5: r = kwait(running);     break;
+//     case 6: r = kexit(running->pid);break;
 
-    case 90: r = kgetc() & 0x7F;    break;
-    case 91: r = kputc(b);          break;
-    case 92: r = kgetPA();          break;
-    default: printf("invalid syscall %d\n", a);
+     case 90: r = kgetc() & 0x7F;    break;
+     case 91: r = kputc(b);          break;
+     case 92: r = kgetPA();          break;
+     default: printf("invalid syscall %d\n", a);
   }
   
   return r;  // return to goUmode in ts.s; replace r0 in Kstack with r
 }
 
-int ksleep(int event)
-{
-  int sr = int_off();
-  printf("proc %d going to sleep on event=%d\n", running->pid, event);
-
-  running->event = event;
-  running->status = SLEEP;
-  enqueue(&sleepList, running);
-  //printList("sleepList", sleepList);
-  tswitch();
-  int_on(sr);
-}

@@ -34,36 +34,30 @@ int ubody(char *name)
        uchname();
     if (strcmp(line, "switch")==0)
        uswitch();
-    if (strcmp(line, "fork")==0)
-       ufork();
-    if (strcmp(line, "sleep")==0)
-       usleep();
+       /*
+    if (strcmp(line, "wait")==0)
+       uwait();
+    if (strcmp(line, "exit")==0)
+       uexit();
+       */
   }
 }
 
-int ufork()
+int uwait()
 {
-  char s[32];
-  uprintf("input proc [e.g. u2] : ");
-  ugetline(s);
-  printf("\n");
-  return syscall(5,s,0,0);
+  return syscall(5, 0, 0, 0);
 }
 
-int usleep()
+int uexit()
 {
-  char s[32];
-  uprintf("enter an event value to sleep on : ");
-  ugetline(s);
-  printf("\n");
-  return syscall(6,s,0,0);
+  return syscall(6, 0, 0, 0);
 }
 
 int umenu()
 {
-  uprintf("-----------------------------------------\n");
-  uprintf("getpid getppid ps chname switch fork sleep\n");
-  uprintf("-----------------------------------------\n");
+  uprintf("----------------------------------------------\n");
+  uprintf("getpid getppid ps chname switch fork wait exit\n");
+  uprintf("----------------------------------------------\n");
 }
 
 int getpid()

@@ -22,6 +22,8 @@ char *tab = "0123456789ABCDEF";
 int BASE;
 int color;
 
+char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCK"};
+
 #include "uart.c"
 #include "kbd.c"
 #include "timer.c"
@@ -30,11 +32,12 @@ int color;
 #include "queue.c"
 #include "kernel.c"
 #include "fork.c"
+//#include "tree.c"
+//#include "wait.c"
 #include "svc.c"
 
 #include "sdc.c"
 #include "yourload.c"
-
 
 void copy_vectors(void) {
     extern u32 vectors_start;
@@ -145,5 +148,6 @@ int main()
      unlock();
      if (readyQueue)
        tswitch();
+       
    }
 }

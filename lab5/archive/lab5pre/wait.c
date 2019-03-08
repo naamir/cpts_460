@@ -1,18 +1,4 @@
-int tswitch();
-
-int ksleep(int event)
-{
-  int sr = int_off();
-  //printf("proc %d going to sleep on event=%d\n", running->pid, event);
-  printf("event %d\n", event);
-  running->event = event;
-  running->status = SLEEP;
-  enqueue(&sleepList, running);
-  printList("sleepList", sleepList);
-  tswitch();
-  int_on(sr);
-}
-
+/*
 int kwakeup(int event)
 {
   PROC *temp, *p;
@@ -35,6 +21,19 @@ int kwakeup(int event)
   
   sleepList = temp;
   //printList("sleepList", sleepList);
+  int_on(sr);
+}
+*/
+int ksleep(int event)
+{
+  int sr = int_off();
+  //printf("proc %d going to sleep on event=%d\n", running->pid, event);
+
+  running->event = event;
+  running->status = SLEEP;
+  enqueue(&sleepList, running);
+  //printList("sleepList", sleepList);
+  tswitch();
   int_on(sr);
 }
 
