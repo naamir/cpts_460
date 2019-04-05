@@ -1,0 +1,3 @@
+(cd USER; ./mku u1; ./mku u2; ./mku u3; ./mku u4)
+
+qemu-system-arm -M versatilepb -m 256M -sd sdimage -kernel t.bin -serial mon:stdio

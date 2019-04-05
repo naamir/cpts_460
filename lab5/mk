@@ -12,4 +12,4 @@ rm t.o ts.o *.elf
 echo ready to go?
 read dummy
 
-qemu-system-arm -M versatilepb -m 256M -sd sdimage -kernel LAB5forkexec -serial mon:stdio
+qemu-system-arm -M versatilepb -m 256M -sd sdimage -kernel t.bin -serial mon:stdio

@@ -36,7 +36,7 @@ PROC *kfork(char *filename)
   }
   p->ppid = running->pid;
   p->parent = running;
-  p->parent = running;
+  //p->parent = running;
   p->status = READY;
   p->priority = 1;
   p->cpsr = (int *)0x10;
