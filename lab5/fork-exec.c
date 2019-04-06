@@ -1,4 +1,3 @@
-
 int goUmode();
 
 int fork()
@@ -9,15 +8,13 @@ int fork()
     PROC *p = dequeue(&freeList);
     if (p==0) {
         kprintf("fork failed\n");
-        return (PROC *)0;
+        return -1;
     }
 
     p->ppid = running->pid;
     p->parent = running;
     p->status = READY;
     p->priority = 1;
-
-    //printf("running usp %x, linkR %x\n", running->usp, running->kstack[SSIZE-15]);
 
     // build p's pgtable 
     p->pgdir = (int *)(0x600000 + (p->pid - 1)*0x4000);
@@ -34,13 +31,13 @@ int fork()
     //ptable[2048] = 0x800000 + (p->pid - 1)*0x100000|0xC3E;
     ptable[2048] = 0x800000 + (p->pid - 1)*0x100000|0xC32;
 
-    PA = (running->pgdir[2048] & 0xFFFF0000); // parent Umode PA
-    CA = (p->pgdir[2048] & 0xFFFF0000);       // child Umode PA
+    PA = (char*)(running->pgdir[2048] & 0xFFFF0000); // parent Umode PA
+    CA = (char*)(p->pgdir[2048] & 0xFFFF0000);       // child Umode PA
     printf("copy Umode image from %x to %x\n", PA, CA);
     memcpy(CA, PA, 0x100000); // copy 1MB Umode image
     printf("copy kernal mode stack\n");
     for (i=0; i<=14; i++) {  // copy bottom 14 entries of kstack
-        p->kstack[SSIZE - 14] = 0;
+        p->kstack[SSIZE - i] = running->kstack[SSIZE - i];
     }
     p->kstack[SSIZE - 14] = 0;  // child return pid=0
     printf("FIX Child PC to run from goUmode @%x\n", (int)goUmode);
