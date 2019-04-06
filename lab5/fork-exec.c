@@ -76,6 +76,9 @@ int exec(char *cmdline)
     kstrcat(file, filename);
     upa = p->pgdir[2048] & 0xFFFF0000;  // PA of Umode image
     // loader return 0 if file non-exist or non-executable
+    if (load(filename, p) != 0)
+        return -1;
+
     usp = upa + 0x100000 - 128;  // assume cmdline len < 128
     strcpy((char *)usp, kline);
     p->usp = (int *)VA(0x100000 - 128);
