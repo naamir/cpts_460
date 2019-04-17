@@ -14,35 +14,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************/
 
-/********************
-#define  SSIZE 1024
-#define  NPROC  9
-#define  FREE   0
-#define  READY  1
-#define  SLEEP  2
-#define  BLOCK  3
-#define  ZOMBIE 4
-#define  printf  kprintf
- 
-typedef struct proc{
-  struct proc *next;
-  int    *ksp;         // at  4
-  int    *usp;         // at  8
-  int    *upc;         // at 12
-  int    *cpsr;        // at 16
-  int    *pgdir;       // ptable address
-
-  int    status;
-  int    priority;
-  int    pid;
-  int    ppid;
-  struct proc *parent;
-  int    event;
-  int    exitCode;
-  char   name[32];     // name string  
-  int    kstack[SSIZE];
-}PROC;
-***************************/
 extern PROC *kfork();
 PROC proc[NPROC], *freeList, *readyQueue, *sleepList, *running;
 

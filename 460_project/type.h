@@ -14,7 +14,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************/
 
-// type.h file
+#ifndef UTYPE
+#define UTYPE
 
 typedef unsigned char  u8;
 typedef unsigned short u16;
@@ -299,3 +300,5 @@ int creat_file(char *pathname);
 int my_creat(MINODE *pip, char *name);
 // rmdir function declarations
 int remove_dir(char *path);
+
+#endif

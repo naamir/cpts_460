@@ -23,7 +23,7 @@ int uprints(char *s)
   }
 }
 
-int urpx(u32 x)
+void urpx(u32 x)
 {
   char c;
   if (x==0) 
@@ -43,7 +43,7 @@ int uprintx(u32 x)
   uputc(' ');
 }
 
-int urpu(u32 x)
+void urpu(u32 x)
 {
   char c;
   if (x==0) 

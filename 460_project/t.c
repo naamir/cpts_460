@@ -35,9 +35,118 @@ char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCK"};
 #include "tree.c"
 #include "svc.c"
 
+#include "type.h"
 #include "sdc.c"
 #include "yourload.c"
 
+
+int initfs()
+{
+	int i, n;
+	MINODE *mip;
+	PROC *p;
+
+	printf("initfs()\n");
+
+	for (i = 0; i < NMINODE; i++)
+	{
+		mip = &minode[i];
+		// set all entries to 0;
+		mip->refCount = 0;
+		mip->dirty = 0;
+		mip->mounted = 0;
+		mip->mptr = 0;
+	}
+
+	for (i = 0; i < NPROC; i++)
+	{
+		p = &proc[i];
+		p->pid = i;
+		p->uid = i;
+		p->cwd = 0;
+
+		// init File Descriptors
+		//getchar();
+		for (n = 0; n < NFD; n++)
+		{
+			oftp[n].refCount = 0;
+			oftp[n].mode = 0;
+			oftp[n].mptr = 0;
+			oftp[n].offset = 0;
+
+			p->fd[n] = &oftp[n]; // note that all fds are now pointing
+							  // to same location - don't know if this is necessary
+		}
+	}
+}
+
+// load root INODE and set root pointer to it
+int mount_root()
+{
+	char buf[BLKSIZE];
+	//SUPER *sp;
+	//GD *gp;
+	//MINODE mip;
+
+	printf("mount_root()\n");
+	/*
+	 (1). read super block in block #1;
+	 verify it is an EXT2 FS;
+	 record nblocks, ninodes as globals;
+       */
+	/* get super block of the rootdev */
+	get_block(dev, 1, buf);
+	sp = (SUPER *)buf;
+	/* check magic number */
+	if (sp->s_magic != SUPER_MAGIC)
+	{
+		printf("super magic=%x : %s is not an EXT2 file system\n",
+					 sp->s_magic, disk);
+		exit(0);
+	}
+	nblocks = sp->s_blocks_count;
+	ninodes = sp->s_inodes_count;
+	/*
+	 (2). get GD0 in Block #2:
+	 record bmap, imap, inodes_start as globals
+       */
+	get_block(dev, 2, buf);
+	gp = (GD *)buf;
+	bmap = gp->bg_block_bitmap;
+	imap = gp->bg_inode_bitmap;
+	iblk = gp->bg_inode_table;
+	/*
+	 (3). root = iget(dev, 2);       // get #2 INODE into minode[ ]
+	 printf("mounted root OK\n");
+	*/
+
+	root = iget(dev, 2);
+	printf("root: dev=%d, ino=%d\n", root->dev, root->ino);
+	printf("root refCount = %d\n", root->refCount);
+
+	printf("creating P0 as running process\n");
+	
+	proc[0].status = READY;
+	proc[0].cwd = iget(dev, 2);
+	running = &proc[0];
+	// set proc[1]'s cwd to root also
+	proc[1].cwd = iget(dev, 2);
+
+	printf("mounted root OK\n");
+}
+
+void reset()
+{
+	int i;
+	for (i=0; i<256; i++)
+		pathname[i] = 0;
+
+	for (i=0; i<64; i++)
+		name[i] = 0;
+	
+	for (i=0; i<32; i++)
+		cmd[i] = 0;
+}
 
 void copy_vectors(void) {
     extern u32 vectors_start;
@@ -50,15 +159,15 @@ void copy_vectors(void) {
 
 int mkPtable()
 {
-  int i;
-  u32 *ut = (u32 *)0x4000;  // at 16KB
-  u32 entry = 0 | 0x412;    // 0x412; AP=01 (K R|W; U NO) domain=0 CB=00
-  for (i=0; i<4096; i++)
-    ut[i] = 0;
-  for (i=0; i<258; i++){
-    ut[i] = entry;
-    entry += 0x100000;
-  }
+    int i;
+    u32 *ut = (u32 *)0x4000;  // at 16KB
+    u32 entry = 0 | 0x412;    // 0x412; AP=01 (K R|W; U NO) domain=0 CB=00
+    for (i=0; i<4096; i++)
+        ut[i] = 0;
+    for (i=0; i<258; i++){
+        ut[i] = entry;
+        entry += 0x100000;
+    }
 }
 
 int kprintf(char *fmt, ...);

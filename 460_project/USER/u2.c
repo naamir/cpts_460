@@ -48,37 +48,37 @@ main0(char *s)
 int argc; char *argv[32];
 int parseArg(char *line)
 {
-  char *cp = line; argc = 0;
-  while (*cp != 0) {
+    char *cp = line; argc = 0;
+    while (*cp != 0) {
     while (*cp == ' ') *cp++ = 0;
     if (*cp != 0)     // token start
-      argv[argc++] = cp;            // pointed be argv
+        argv[argc++] = cp;            // pointed be argv
     while (*cp != ' ' && *cp != 0)// scan token chars
-      cp++;
+        cp++;
     if (*cp != 0)
-      *cp = 0;   // end of token
+        *cp = 0;   // end of token
     else
-      break;     // continue scan
+        break;     // continue scan
     cp++;
-  }
-  argv[argc] = 0;
+    }
+    argv[argc] = 0;
 }
 
 main0(char *cmdline)
 {
-  uprintf("main0: cmdline = %s\n", cmdline);
-  parseArg(cmdline);
-  main(argc, argv);
+    uprintf("main0: cmdline = %s\n", cmdline);
+    parseArg(cmdline);
+    main(argc, argv);
 }
 
 int main(int argc, char *argv[])
 {
-  int i;
-  printf("argc=%d\n", argc);
+    int i;
+    printf("argc=%d\n", argc);
 
-  for (i = 0; i < argc; i++) {
-    printf("argv[%d]=%s\n", i, argv[i]);
-  }
-  ubody("two");
+    for (i = 0; i < argc; i++) {
+        printf("argv[%d]=%s\n", i, argv[i]);
+    }
+    ubody("two");
 }
 

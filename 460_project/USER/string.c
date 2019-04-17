@@ -1,4 +1,6 @@
-int kprintf(char *, ...);
+#include "utype.h"
+
+
 int strlen(char *s)
 {
   int i = 0;
