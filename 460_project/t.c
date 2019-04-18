@@ -35,10 +35,16 @@ char *status[ ] = {"FREE", "READY", "SLEEP", "ZOMBIE", "BLOCK"};
 #include "tree.c"
 #include "svc.c"
 
-#include "type.h"
 #include "sdc.c"
 #include "yourload.c"
+#include "util.c"
 
+MINODE  minode[NMINODE];
+OFT 	oftp[NFD];
+MINODE  *root;
+int fd, dev;
+int nblocks, ninodes, bmap, imap, iblk;
+//PROC 	proc[NPROC], *running;
 
 int initfs()
 {
@@ -57,27 +63,6 @@ int initfs()
 		mip->mounted = 0;
 		mip->mptr = 0;
 	}
-
-	for (i = 0; i < NPROC; i++)
-	{
-		p = &proc[i];
-		p->pid = i;
-		p->uid = i;
-		p->cwd = 0;
-
-		// init File Descriptors
-		//getchar();
-		for (n = 0; n < NFD; n++)
-		{
-			oftp[n].refCount = 0;
-			oftp[n].mode = 0;
-			oftp[n].mptr = 0;
-			oftp[n].offset = 0;
-
-			p->fd[n] = &oftp[n]; // note that all fds are now pointing
-							  // to same location - don't know if this is necessary
-		}
-	}
 }
 
 // load root INODE and set root pointer to it
@@ -95,14 +80,14 @@ int mount_root()
 	 record nblocks, ninodes as globals;
        */
 	/* get super block of the rootdev */
-	get_block(dev, 1, buf);
+	getblock(1, buf);
 	sp = (SUPER *)buf;
 	/* check magic number */
 	if (sp->s_magic != SUPER_MAGIC)
 	{
-		printf("super magic=%x : %s is not an EXT2 file system\n",
-					 sp->s_magic, disk);
-		exit(0);
+		printf("super magic (disk) : %s is not an EXT2 file system\n",
+					 sp->s_magic);  //, disk
+		return 0; //exit(0);
 	}
 	nblocks = sp->s_blocks_count;
 	ninodes = sp->s_inodes_count;
@@ -110,7 +95,7 @@ int mount_root()
 	 (2). get GD0 in Block #2:
 	 record bmap, imap, inodes_start as globals
        */
-	get_block(dev, 2, buf);
+	getblock(2, buf);
 	gp = (GD *)buf;
 	bmap = gp->bg_block_bitmap;
 	imap = gp->bg_inode_bitmap;
@@ -124,18 +109,20 @@ int mount_root()
 	printf("root: dev=%d, ino=%d\n", root->dev, root->ino);
 	printf("root refCount = %d\n", root->refCount);
 
-	printf("creating P0 as running process\n");
-	
-	proc[0].status = READY;
-	proc[0].cwd = iget(dev, 2);
-	running = &proc[0];
+	//printf("creating P0 as running process\n");
+	////////////////////////////////////////////////////////////////
+    // WE NEED TO ASSIGN THE FILE SYS VALUES TO PROCS...HOW?????
+    ////////////////////////////////////////////////////////////////
+	//proc[0].status = READY;
+	//proc[0].cwd = iget(dev, 2);
+	//running = &proc[0];
 	// set proc[1]'s cwd to root also
-	proc[1].cwd = iget(dev, 2);
+	//proc[1].cwd = iget(dev, 2);
 
 	printf("mounted root OK\n");
 }
 
-void reset()
+/* void reset()
 {
 	int i;
 	for (i=0; i<256; i++)
@@ -146,7 +133,7 @@ void reset()
 	
 	for (i=0; i<32; i++)
 		cmd[i] = 0;
-}
+} */
 
 void copy_vectors(void) {
     extern u32 vectors_start;
@@ -212,6 +199,11 @@ int main()
     row = col = 0; 
     BASE = 10;
 
+    // in 360 we opened the passed in sdimage and assigned dev the value of the returned fd
+    // at the moment we don't have a 'dev' value as the sdimage is passed into QEMU so taking '1'
+    // as default value
+    fd = dev = 1;
+
     fbuf_init();
     kprintf("                     Welcome to WANIX in Arm\n");
     kprintf("LCD display initialized : fbuf = %x\n", fb);
@@ -242,7 +234,10 @@ int main()
     sdc_init();
     kernel_init();
 
-    kfork("u1");
+    initfs();
+    mount_root();
+
+    kfork("init");
     //kfork("u2");
     //kfork("u3");
     //kfork("u4");

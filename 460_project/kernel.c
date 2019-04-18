@@ -13,8 +13,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************/
-
+extern OFT  oftp[NFD];
 extern PROC *kfork();
+
 PROC proc[NPROC], *freeList, *readyQueue, *sleepList, *running;
 
 int procsize = sizeof(PROC);
@@ -41,14 +42,30 @@ int kernel_init()
 
         strcpy(p->name, pname[i]);
         p->next = p + 1;
+        // proc[i]'s umode pgdir and pagetable are at 6MB+pid*16KB
+        p->pgdir = (int *)(0x600000 + (p->pid-1)*0x4000);
+
+        // init File Descriptors
+        for (i = 0; i < NFD; i++)
+        {
+            oftp[i].refCount = 0;
+            oftp[i].mode = 0;
+            oftp[i].mptr = 0;
+            oftp[i].offset = 0;
+
+            p->fd[i] = &oftp[i]; // note that all fds are now pointing
+                                // to same location - don't know if this is necessary
+        }
     }
     proc[NPROC-1].next = 0;
     freeList = &proc[0];
     readyQueue = 0;
     sleepList = 0;
-    running = getproc();
+    // create P0 as thje initial running process
+    printf("creating P0 in kernal_init()\n");
+    p = running = getproc();
     running->status = READY;
-
+    p->uid = p->gid = 0;
     printList(freeList);
 }
 

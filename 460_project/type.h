@@ -53,50 +53,30 @@ typedef unsigned int   u32;
 #define SIC_ENSET     (*((volatile u32 *)(SIC_BASE_ADDR + 0x008)))
 #define SIC_PICENSET  (*((volatile u32 *)(SIC_BASE_ADDR + 0x020)))
 
-#define LINES  4
-#define N_SCAN 64
+#define LINES  		4
+#define N_SCAN 		64
 
-#define BLUE   0
-#define GREEN  1
-#define RED    2
-#define CYAN   3
-#define YELLOW 4
-#define PURPLE 5
-#define WHITE  6
+#define BLUE   		0
+#define GREEN  		1
+#define RED    		2
+#define CYAN   		3
+#define YELLOW 		4
+#define PURPLE 		5
+#define WHITE  		6
 
-#define  SSIZE 1024
-#define  NPROC  9
-#define  FREE   0
-#define  READY  1
-#define  SLEEP  2
-#define  BLOCK  3
-#define  ZOMBIE 4
+#define  SSIZE 		1024
+#define  NPROC  	9
+#define  NMINODE    64
+#define  NFD        16
+#define  FREE   	0
+#define  READY  	1
+#define  SLEEP  	2
+#define  BLOCK  	3
+#define  ZOMBIE 	4
+
 #define  printf  kprintf
  
-typedef struct proc{
-  struct proc *next;
 
-  int    *ksp;     // at 4
-  int    *usp;     // at 8 : Umode sp at time of syscall
-  int    *upc;     // at 12: linkR at time of syscall
-  int    *cpsr;    // at 16: Umode cpsr
-
-  u32    *pgdir;   // level-1 page table pointer
-  int     inkmode; 
-
-  int    status;
-  int    priority;
-  int    pid;
-  int    ppid;
-  struct proc *parent;
-  struct proc *child;
-  struct proc *sibling;
-  int    event;
-  int    exitCode;
-
-  char   name[64];
-  int    kstack[SSIZE];
-}PROC;
 /**********************************************************************
 pgdir of PROC in ARM: 
 initial plan: each PROC has a dedicated pgdir at 6M or 7MB by pid
@@ -255,6 +235,35 @@ typedef struct oft{
   int          offset;
 }OFT;
 
+typedef struct proc{
+	struct proc *next;
+
+	int    *ksp;     // at 4
+	int    *usp;     // at 8 : Umode sp at time of syscall
+	int    *upc;     // at 12: linkR at time of syscall
+	int    *cpsr;    // at 16: Umode cpsr
+
+	u32		*pgdir;   // level-1 page table pointer
+	int    	uid; 
+	int	 	gid;
+
+	int    	status;
+	int    	priority;
+	int    	pid;
+	int    	ppid;
+	int    	event;
+	int    	exitCode;
+
+	struct 	proc *parent;
+	struct 	proc *child;
+	struct 	proc *sibling;
+	MINODE	*cwd;
+	OFT		*fd[NFD];
+
+	char   	name[64];
+	int    	kstack[SSIZE];
+}PROC;
+
 // typedef struct proc{
 //   struct proc *next;
 //   int          pid;
@@ -300,5 +309,23 @@ int creat_file(char *pathname);
 int my_creat(MINODE *pip, char *name);
 // rmdir function declarations
 int remove_dir(char *path);
+
+
+/* // uart.c declarations
+int uart_init();
+void uart_handler(UART *up);
+int do_rx(UART *up);
+int do_tx(UART *up);
+int ugetc(UART *up);
+int uputc(UART *up, char c);
+int ugets(UART *up, char *s);
+int uprints(UART *up, char *s);
+int urpx(UART *up, int x);
+int uprintx(UART *up, int x);
+int urpu(UART *up, int x);
+int uprintu(UART *up, int x);
+int uprinti(UART *up, int x);
+int ufprintf(UART *up, char *fmt,...);
+int uprintf(char *fmt, ...) */
 
 #endif

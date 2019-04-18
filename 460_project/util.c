@@ -1,9 +1,9 @@
 /**** globals defined in main.c file ****/
-#include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ext2fs/ext2_fs.h>
+// #include <sys/stat.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <ext2fs/ext2_fs.h>
 #include "type.h"
 
 extern MINODE minode[NMINODE];
@@ -17,7 +17,7 @@ extern int nblocks, ninodes, bmap, imap, iblk;
 extern char pathname[256];
 
 /*************************FUNCTIONS*******************************/
-int get_block(int dev, int blk, char *buf)
+/* int get_block(int dev, int blk, char *buf)
 {
     lseek(dev, (long)blk*BLKSIZE, 0);
     int n = read(dev, buf, BLKSIZE);
@@ -29,7 +29,7 @@ int put_block(int dev, int blk, char *buf)
     lseek(dev, (long)blk*BLKSIZE, 0);
     int n = write(dev, buf, BLKSIZE);
     if (n != BLKSIZE) printf("put_block: [%d %d] error\n", dev, blk);
-}
+} */
 
 MINODE* mialloc()   // allocate a free inode
 {
@@ -77,7 +77,7 @@ MINODE* iget(int dev, int ino)
 
     block = (ino - 1) / 8 + iblk;
     offset = (ino - 1) % 8;
-    get_block(dev, block, buf);
+    getblock(block, buf);
     
     ip = (INODE*) buf + offset;
     mip->INODE = *ip;    // this is where inode on disk is placed in memory
@@ -111,14 +111,14 @@ int iput(MINODE *mip)
     offset = (mip->ino - 1) % 8;
 
     // get block containing this inode
-    get_block(mip->dev, block, buf);
+    getblock(block, buf);  // mip->dev,
     ip = (INODE  *)buf + offset;      // ip now points to INODE of mip
     *ip = mip->INODE;           // copy INODE to inode in block
-    put_block(mip->dev, block, buf);  // write back to disk
+    putblock(block, buf);  // write back to disk
     midalloc(mip);                  // mip->refCount = 0;
 }
 
-int tokenize(char *path)
+/* int tokenize(char *path)
 {
     int i = 0;
     char *s;
@@ -132,9 +132,9 @@ int tokenize(char *path)
         i++;
 	}
     return i;
-}
+} */
 
-int search(MINODE *mip, char *name)
+/* int search(MINODE *mip, char *name)
 // which searches the DIRectory's data blocks for a name string; 
 // return its inode number if found; 0 if not.
 {
@@ -164,6 +164,24 @@ int search(MINODE *mip, char *name)
     }
     printf("\n");
     return 0;
+} */
+/* int argc; char *argv[32];
+int parseArg(char *line)
+{
+    char *cp = line; argc = 0;
+    while (*cp != 0) {
+    while (*cp == ' ') *cp++ = 0;
+    if (*cp != 0)     // token start
+        argv[argc++] = cp;            // pointed be argv
+    while (*cp != ' ' && *cp != 0)// scan token chars
+        cp++;
+    if (*cp != 0)
+        *cp = 0;   // end of token
+    else
+        break;     // continue scan
+    cp++;
+    }
+    argv[argc] = 0;
 }
 
 int getino(char *pathname)
@@ -271,4 +289,4 @@ int dbname(char *pathname, char *dname, char *bname)
     strcpy(dname, dirname(temp));
     strcpy(temp, pathname);
     strcpy(bname, basename(temp));
-}
+} */

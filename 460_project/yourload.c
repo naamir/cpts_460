@@ -7,34 +7,34 @@ char buf[1024], buf1[1024], buf2[1024];
 
 int search(INODE *ip, char *name)
 {
-   int i; 
-   char c, *cp;
-   DIR  *dp; 
-   printf("search for %s: ", name);   
+    int i; 
+    char c, *cp;
+    DIR  *dp; 
+    printf("search for %s: ", name);   
 
-   for (i=0; i<12; i++){
-       if ( ip->i_block[i] ){
-	 //printf("i_block[%d] = %d\n", i, ip->i_block[i]);
-          getblock(ip->i_block[i], buf2);
-          dp = (DIR *)buf2;
-          cp = buf2;
-          while (cp < &buf2[1024]){
-            c = dp->name[dp->name_len];  // save last byte
+    for (i=0; i<12; i++){
+        if ( ip->i_block[i] ){
+            //printf("i_block[%d] = %d\n", i, ip->i_block[i]);
+            getblock(ip->i_block[i], buf2);
+            dp = (DIR *)buf2;
+            cp = buf2;
+            while (cp < &buf2[1024]){
+                c = dp->name[dp->name_len];  // save last byte
 
-            dp->name[dp->name_len] = 0;   
-            printf("%s ", dp->name); 
+                dp->name[dp->name_len] = 0;   
+                printf("%s ", dp->name); 
 
-            if ( strcmp(dp->name, name) == 0 ){
-            printf("found %s\n", name); 
-              return(dp->inode);
+                if ( strcmp(dp->name, name) == 0 ){
+                    printf("found %s\n", name); 
+                    return(dp->inode);
+                }
+                dp->name[dp->name_len] = c; // restore that last byte
+                cp += dp->rec_len;
+                dp = (DIR *)cp;
             }
-            dp->name[dp->name_len] = c; // restore that last byte
-            cp += dp->rec_len;
-            dp = (DIR *)cp;
-	}
-     }
-   }
-   printf("search failed\n");
+        }
+    }
+    printf("search failed\n");
 }
 
 load(char *filename, PROC *p)

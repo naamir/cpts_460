@@ -115,7 +115,7 @@ void timer_init()
 void timer_start(int n) // timer_start(0), 1, etc.
 {
   TIMER *tpr;
-  kprintf("timer_start: ");
+  kprintf("timer_start: \n");
   tpr = tp[n]; 
   tpr->CONTROL |= 0x80;  // set enable bit 7
 }
