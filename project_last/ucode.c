@@ -478,25 +478,25 @@ int pwd()
 
 int eatpath(char *line, char *name[ ])  
 {
-  int i, n; char *cp;
+    int i, n; char *cp;
 
-  n = 0; 
-  for (i=0; i<16; i++)
-      name[i]=0;
+    n = 0; 
+    for (i=0; i<16; i++)
+        name[i]=0;
 
-  cp = line;
-  while (*cp != 0){
-       while (*cp == ' ')
-              *cp++ = 0;       
-       if (*cp != 0)
-           name[n++] = cp; 
-       while (*cp != ' ' && *cp != 0)
-	       cp++; 
-       if (*cp != 0)       
-	   *cp = 0;        
-       else
-           break; 
-       cp++;
+    cp = line;
+    while (*cp != 0){
+        while (*cp == ' ')
+                *cp++ = 0;       
+        if (*cp != 0)
+            name[n++] = cp; 
+        while (*cp != ' ' && *cp != 0)
+            cp++; 
+        if (*cp != 0)       
+        *cp = 0;        
+        else
+            break; 
+        cp++;
   }
 
   /*
