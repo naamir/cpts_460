@@ -452,25 +452,25 @@ int getphypage(int x, int y)
 
 int pagetable()
 {
-  return syscall(66, 0, 0);
+    return syscall(66, 0, 0);
 }
 
 int getcs()
 {
-  return syscall(67,0,0);
+    return syscall(67,0,0);
 }
 
 int exit(int value)
 {
-   return syscall(9, value, 0);
+    return syscall(9, value, 0);
 }
 
 int pwd()
 {
-  char cwd[64];
-  getcwd(cwd);
-  printf("%s\n\r", cwd);
-  return 0;
+    char cwd[64];
+    getcwd(cwd);
+    printf("%s\n\r", cwd);
+    return 0;
 }
 
 
@@ -487,55 +487,55 @@ int eatpath(char *line, char *name[ ])
     cp = line;
     while (*cp != 0){
         while (*cp == ' ')
-                *cp++ = 0;       
+            *cp++ = 0;       
         if (*cp != 0)
             name[n++] = cp; 
-        while (*cp != ' ' && *cp != 0)
+        while (*cp != '\n' && *cp != 0)
             cp++; 
         if (*cp != 0)       
         *cp = 0;        
         else
             break; 
         cp++;
-  }
+    }
 
-  /*
-  for (i=0; i < n; i++){
-      if (name[i]){
-         prints(name[i]); prints("  ");
-      }
-  }
-  prints("\n\r");
-  */
-  return n;
+    /*
+    for (i=0; i < n; i++){
+    if (name[i]){
+        prints(name[i]); prints("  ");
+    }
+    }
+    prints("\n\r");
+    */
+    return n;
 }
 
 int strcasecmp(char *s1, char *s2)
-{
-  char *cp;
+    {
+    char *cp;
 
-  char t1[64], t2[64];
-  strcpy(t1, s1); 
-  strcpy(t2,s2);
+    char t1[64], t2[64];
+    strcpy(t1, s1); 
+    strcpy(t2,s2);
 
-  //printf("t1=%s  t2=%s  ", t1, t2);
+    //printf("t1=%s  t2=%s  ", t1, t2);
 
-  cp = t1;
+    cp = t1;
 
-  while(*cp){  // all to lower case
-    if (('A' <= *cp) && (*cp <= 'Z')){
-      *cp = *cp - 'A' + 'a';
+    while(*cp){  // all to lower case
+        if (('A' <= *cp) && (*cp <= 'Z')){
+        *cp = *cp - 'A' + 'a';
+        }
+        cp++;
     }
-    cp++;
-  }
-  //printf("t1=%s  ", t1);
-  cp = t2;
-  while(*cp){  // all to upper case
-    if (('A' <= *cp) && (*cp <= 'Z')){
-      *cp = *cp - 'A' + 'a';
+    //printf("t1=%s  ", t1);
+    cp = t2;
+    while(*cp){  // all to upper case
+        if (('A' <= *cp) && (*cp <= 'Z')){
+        *cp = *cp - 'A' + 'a';
+        }
+        cp++;
     }
-    cp++;
-  }
-  //printf("t2=%s\n", t1, t2);
-  return strcmp(t1, t2);
+    //printf("t2=%s\n", t1, t2);
+    return strcmp(t1, t2);
 }
