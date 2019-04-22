@@ -39,7 +39,7 @@ main(int argc, char *argv[])
 
     in = open(argv[1], O_RDONLY);   // file descriptor 0
     out = open(argv[1], O_WRONLY);   // for disply to console
-    err = open(argv[1], O_WRONLY);   // for errors
+    err = open(argv[1], O_RDWR);   // for errors
 
     fixtty(argv[1]);
     fd = open("/etc/passwd", O_RDONLY);
