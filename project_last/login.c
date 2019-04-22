@@ -1,9 +1,5 @@
 #include "ucode.c"
 
-#define IN      0
-#define OUT     1
-#define BLKSIZE 1024
-
 int in, out, err, tknum;//, tknum2;
 int usergid, useruid;
 char username[128], password[128];
@@ -52,14 +48,14 @@ main(int argc, char *argv[])
         //prints(buf);
     }
     num = eatpath(buf, myline);
-    
+    prints("NOFs LOGIN "); prints("tty: "); prints(argv[1]); prints("\n");
     while (1)
     {
         psw_flag = 0;
         memset(ent_username, 0, 128);
         memset(ent_password, 0, 128);
-        prints("login_nofal:"); gets(ent_username);
-        prints("password_nofal:"); gets(ent_password);
+        prints("login_n:"); gets(ent_username);
+        prints("password_n:"); gets(ent_password);
         for (i=0; i < num; i++)
         {
             //prints(myline[i]); prints("  l\n");

@@ -26,7 +26,7 @@ int parent()  // P1's code
 int main()
 {
     //ubody("one");
-    int in1, out1, in2, out2, in3, out3;   // file descriptors for terminal I/O
+/*     int in1, out1, in2, out2, in3, out3;   // file descriptors for terminal I/O
     in1 = open("/dev/tty0", O_RDONLY);   // file descriptor 0
     out1 = open("/dev/tty0", O_WRONLY);   // for disply to console
 
@@ -34,22 +34,26 @@ int main()
     out2 = open("/dev/ttyS0", O_WRONLY);   // for disply to console
 
     in3 = open("/dev/ttyS1", O_RDONLY);   // file descriptor 0
-    out3 = open("/dev/ttyS1", O_WRONLY);   // for disply to console
+    out3 = open("/dev/ttyS1", O_WRONLY);   // for disply to console */
 
     prints("INIT Nofal: fork a login proc on console\n");
     console = fork();
+    //console1 = fork();
 
     if (console)  // parent
-        parent();
+    {
+        console1 = fork();
+        if (console1)  // parent
+        {
+            console2 = fork();
+            if (console2)  // parent
+                parent();
+            else        // child: exec to login on ttyS1
+                exec("login /dev/ttyS1");
+        }
+        else        // child: exec to login on ttyS0
+            exec("login /dev/ttyS0");
+    }
     else        // child: exec to login on tty0
         exec("login /dev/tty0");
-
-/*     console = fork();
-    //console = fork();
-    if (console)  // parent
-        parent();
-    else        // child: exec to login on tty0
-    {
-        exec("login /dev/ttyS0");
-    } */
 }

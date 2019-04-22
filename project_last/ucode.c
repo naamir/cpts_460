@@ -23,6 +23,10 @@ typedef unsigned int   u32;
 #include "crt0.c"
 //#include "string.h"
 
+#define IN      0
+#define OUT     1
+#define BLKSIZE 1024
+
 int pid;
 char line[64], pathname[32], i2[32], i3[32];
 char *name[16], components[64];

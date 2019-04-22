@@ -1,6 +1,7 @@
 #include "ucode.c"
 
 int tknum;
+int numpipes, fd;//, pipeflag;
 char *tok[32];
 
 void tokenize_line(char *line)
@@ -23,17 +24,100 @@ void tokenize_line(char *line)
     tok[tknum] = 0;
 }
 
+/* int bepipin()
+{
+    int pd[2], pid, r = 0;
+
+    pipe(pd);        // creates a PIPE; pd[0] for READ  from the pipe, 
+    //                 pd[1] for WRITE to   the pipe.
+
+    pid = fork();    // fork a child process
+    // child also has the same pd[0] and pd[1]
+
+    if (pid){        // parent as pipe WRITER
+        close(pd[0]); // WRITER MUST close pd[0]
+        close(1);     // close 1
+        dup(pd[1]);   // replace 1 with pd[1]
+        close(pd[1]); // close pd[1] since it has replaced 1
+        
+        for (int c = 0; c < no_paths; c++)
+        {
+            getCommand(c, head);
+            r = execve(command);   // change image to cmd1
+        }
+        if (r < 0)    printf("errno=%d : %s\n", errno, strerror(errno));
+
+        exit(1);  // exit pipe WRITER
+    }
+    else{            // child as pipe READER
+        close(pd[1]); // READER MUST close pd[1]
+        close(0);  
+        dup(pd[0]);   // replace 0 with pd[0]
+        close(pd[0]); // close pd[0] since it has replaced 0
+        
+        for (int c = 0; c < no_paths; c++)
+        {
+            getCommand(c, tail);
+            r = execve(command, tail, env);   // change image to cmd2
+        }
+        if (r < 0)    printf("errno=%d : %s\n", errno, strerror(errno));
+
+        exit(1);  // exit pipe READER
+    }
+} */
+
+void parseArgs()
+{ 
+    int n;
+    for (n = 1; n < tknum; n++)
+    {
+        if (strcmp(tok[n], "<") == 0)
+        {
+            printf("Redirect Input < infile\n");  // take inputs from infile
+            fd = open(tok[n+1], O_RDONLY);  // open filename for READ, which
+                                                // will replace fd 0
+            dup2(fd, 0);    // system call to close file descriptor 0
+        }
+        else if (strcmp(tok[n], ">") == 0)
+        {
+            printf("Redirect Output > outfile\n");  // send outputs to outfile
+            fd = open(tok[n+1], O_WRONLY|O_CREAT); // open filename for WRITE, which
+                                                            // will replace fd 0
+            dup2(fd, 1);    // system call to close file descriptor 1
+            close(fd);
+        }
+        else if (strcmp(tok[n], ">>") == 0)
+        {
+            printf("Redirect Output >> outfile APPEND\n");  // APPEND outputs to outfile
+            fd = open(tok[n+1], O_WRONLY|O_CREAT|O_APPEND); // open filename for WRITE, which
+                                                            // will replace fd 0
+            dup2(fd, 1);    // system call to close file descriptor 0
+            close(fd);
+        }
+        else if (strcmp(tok[n], "|") == 0)
+        {
+            printf("has | let the pipin beginnnn\n");  // pipe dat shiz
+            //pipeflag = 1;
+            numpipes++;
+            printf("numpipes:%d\n", numpipes);
+        }
+    }
+}
+
 main(int argc, char *argv[])
 {
     int r, pid, status;
-    char cmdline[128];
+    char cmdline[128], noIOcmd[128];
     while (1)
     {
         memset(cmdline, 0, 128);
+        numpipes = 0;
         prints("sh: #"); gets(cmdline);
-
+        //prints("cmd: "); prints(cmdline); prints("\n");
         if (strcmp(cmdline, "\0") == 0 || cmdline[0] == ' ') 
             continue;
+        // copy cmdline into nIOcmd so that can be passed to non-IO commands, like "cat filename"
+        strcpy(noIOcmd, cmdline);
         //tokenize dat shit!
         tokenize_line(cmdline);
 
@@ -64,8 +148,13 @@ main(int argc, char *argv[])
         pid = fork();
         if (pid == 0)
         {
-            r = exec(cmdline);
-            if (r < 0)    prints("some exec error\n");
+            parseArgs();
+            // add piping function....
+	        //if (pipeflag)
+            prints("********nofal program exec********\n");
+            //prints("cmd2: "); prints(noIOcmd); prints("\n");
+            r = exec(noIOcmd);
+            if (r < 0)    prints("exec error - cmd not found\n");
 
             exit(1);
         }
