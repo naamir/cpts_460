@@ -43,10 +43,12 @@ main(int argc, char *argv[])
 
     fixtty(argv[1]);
     fd = open("/etc/passwd", O_RDONLY);
-    while (n = read(fd, buf, BLKSIZE)) {
+    /* while (n = read(fd, buf, BLKSIZE)) {
         buf[n] = 0;
         //prints(buf);
-    }
+    } */
+    n = read(fd, buf, BLKSIZE);
+    buf[n] = 0;
     num = eatpath(buf, myline);
     prints("NOFs LOGIN "); prints("tty: "); prints(argv[1]); prints("\n");
     while (1)

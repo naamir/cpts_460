@@ -7,11 +7,11 @@ int parent()  // P1's code
     int pid, status;
     while(1)
     {
-        printf("INIT : wait for ZOMBIE child\n");
+        prints("INIT : wait for ZOMBIE child\n");
         pid = wait(&status);
         if (pid == console)  // if console login process died
         {
-            printf("INIT Nofal parent: forks a new console login\n");
+            prints("INIT Nofal parent: forks a new console login\n");
             console = fork();  // fork another one
 
             if (console)
@@ -20,13 +20,13 @@ int parent()  // P1's code
                 exec("login /dev/tty0");  // new console login process
         }
     }
-    printf ("INIT: I just buried an orphan child proc %d\n", pid);
+    printf("INIT: I just buried an orphan child proc %d\n", pid);
 }
 
 int main()
 {
     //ubody("one");
-/*     int in1, out1, in2, out2, in3, out3;   // file descriptors for terminal I/O
+    int in1, out1, in2, out2, in3, out3;   // file descriptors for terminal I/O
     in1 = open("/dev/tty0", O_RDONLY);   // file descriptor 0
     out1 = open("/dev/tty0", O_WRONLY);   // for disply to console
 
@@ -34,7 +34,7 @@ int main()
     out2 = open("/dev/ttyS0", O_WRONLY);   // for disply to console
 
     in3 = open("/dev/ttyS1", O_RDONLY);   // file descriptor 0
-    out3 = open("/dev/ttyS1", O_WRONLY);   // for disply to console */
+    out3 = open("/dev/ttyS1", O_WRONLY);   // for disply to console
 
     prints("INIT Nofal: fork a login proc on console\n");
     console = fork();
