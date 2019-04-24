@@ -2,7 +2,7 @@
 
 #define MORBLKSIZE 512
 
-char q, mline[128], buf[MORBLKSIZE];
+char q, mline[128];
 
 
 int getmorline(int fd, char *line) //, char *buf)
@@ -27,14 +27,24 @@ int getmorline(int fd, char *line) //, char *buf)
 
 int main(int argc, char *argv[])
 {    
-    int i, n, fd, nbytes, offset;
-
+    int i, n, fd, intty, outtty, nbytes, offset;
+    char tty[32];
     prints("*******************************\n");
     prints("***********more Nofal***********\n");
     prints("*******************************\n");
 
-    fd = open(argv[1], O_RDONLY);
-    if (fd < 0) return 0;
+    // get the current tty
+    gettty(tty);
+
+    // open the current tty for read and write
+    intty = open(tty, O_RDONLY);
+    outtty = open(tty, O_WRONLY);
+
+    if (argv[1] != 0)
+    {
+        fd = open(argv[1], O_RDONLY);
+        if (fd < 0) return 0;
+    }
 
     char q;
     int r = 0, nline = 15;
@@ -55,4 +65,6 @@ int main(int argc, char *argv[])
             nline = 15;
     }
     close(fd);
+    close(intty);
+    close(outtty);
 }

@@ -65,6 +65,28 @@ void tokenize_line(char *line)
         exit(1);  // exit pipe READER
     }
 } */
+int bepipin(char *cmd1, char *cmd2)
+{
+    printf("cmd1:%s cmd2:%s\n", cmd1, cmd2);
+    int pd[2], pid, r = 0;
+
+    pipe(pd);   // creates a PIPE; pd[0] for READ, pd[1] for WRITE
+    pid = fork();  // fork a child to share a pipe
+
+    if (pid)  // parent: as pipe READER
+    {
+        close(pd[1]);    // close pipe WRITE end
+        dup2(pd[0], 0);  // redirect stdin to pipe READ end
+        exec(cmd2);
+    }
+    else      // child: as pipe WRITER
+    {
+        close(pd[0]);    // close pipe READ end
+        dup2(pd[1], 1);  // redirect stout to pipe WRITE end
+        exec(cmd1);
+    }
+    
+}
 
 void parseArgs()
 { 
@@ -118,7 +140,7 @@ main(int argc, char *argv[])
             continue;
         // copy cmdline into nIOcmd so that can be passed to non-IO commands, like "cat filename"
         strcpy(noIOcmd, cmdline);
-        //tokenize dat shit!
+        //tokenize dat shit! in tok[32] and num of tokens in tknum
         tokenize_line(cmdline);
 
         if (strcmp(cmdline, "logout") == 0) 
@@ -145,14 +167,26 @@ main(int argc, char *argv[])
         
         //if (strcmp(cmdline, "\n")) continue;
         printf("\nTHIS IS %d  MY PARENT=%d\n", getpid(), getppid());
+
+        prints("********nofal program exec********\n");
+        parseArgs();
+        // add piping function....
+        if (numpipes > 0)
+        {
+            prints("bepipin\n");
+            char cmd1[64], cmd2[64];
+            strcpy(cmd1, tok[0]);   strcpy(cmd2, tok[3]);
+            strcat(cmd1, " ");      //strcat(cmd2, " ");
+            strcat(cmd1, tok[1]);   //strcat(cmd2, tok[4]);
+            bepipin(cmd1, cmd2);
+        }
+
         pid = fork();
         if (pid == 0)
         {
-            parseArgs();
-            // add piping function....
-	        //if (pipeflag)
-            prints("********nofal program exec********\n");
+            
             //prints("cmd2: "); prints(noIOcmd); prints("\n");
+            
             r = exec(noIOcmd);
             if (r < 0)    prints("exec error - cmd not found\n");
 

@@ -9,15 +9,31 @@ int main(int argc, char *argv[])
     prints("***********cat Nofal***********\n");
     prints("*******************************\n");
 
-    //strcat(ar)
-    fd = open(argv[1], O_RDONLY);
-    if (fd < 0) return 0;
-    //pfd();
-    while(n = read(fd, buf, BLKSIZE))
+    if (argv[1] == 0)
     {
-        buf[n] = 0;             // as a null terminated string
-        prints(buf);  // <=== THIS works but not good
-        //spit out chars from mybuf[ ] but handle \n properly;
-    }     
-    close(fd);
+        int l;
+        char q;
+        prints("no file provided - reading from stdin\n");
+        getline(buf);
+        while (buf[0] != 'q')
+        {
+            l = gets(buf);
+            buf[l] = 0;
+            strcat(buf, "\n");
+            prints(buf);
+        }
+    }
+    else
+    {
+        fd = open(argv[1], O_RDONLY);
+        if (fd < 0) 
+            return -1;
+        
+        while(n = read(fd, buf, BLKSIZE))
+        {
+            buf[n] = 0;  // as a null terminated string
+            prints(buf);
+        }     
+        close(fd);
+    }    
 }
