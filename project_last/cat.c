@@ -1,4 +1,6 @@
 #include "ucode.c"
+int intty, outtty;
+char tty[32];
 
 int main(int argc, char *argv[])
 {
@@ -8,8 +10,9 @@ int main(int argc, char *argv[])
     prints("*******************************\n");
     prints("***********cat Nofal***********\n");
     prints("*******************************\n");
-
-    if (argv[1] == 0)
+    //gettty(tty);
+    //outtty = open(tty, O_WRONLY);
+    if (argc == 1)
     {
         int l;
         char q;
@@ -35,5 +38,8 @@ int main(int argc, char *argv[])
             prints(buf);
         }     
         close(fd);
-    }    
+    }
+    
+    //dup2(OUT, outtty);
+    
 }

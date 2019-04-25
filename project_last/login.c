@@ -47,12 +47,13 @@ main(int argc, char *argv[])
         buf[n] = 0;
         //prints(buf);
     } */
-    n = read(fd, buf, BLKSIZE);
-    buf[n] = 0;
-    num = eatpath(buf, myline);
+    
     prints("NOFs LOGIN "); prints("tty: "); prints(argv[1]); prints("\n");
     while (1)
     {
+        n = read(fd, buf, BLKSIZE);
+        buf[n] = 0;
+        num = eatpath(buf, myline);
         psw_flag = 0;
         memset(ent_username, 0, 128);
         memset(ent_password, 0, 128);

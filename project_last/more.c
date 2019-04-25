@@ -23,11 +23,27 @@ int getmorline(int fd, char *line) //, char *buf)
         line[i++] = c;
     }
     line[i] = 0;
+    return n;
+}
+
+int getcCustom(int pd)
+{
+    int c, n;
+    n = read(pd, &c, 1);
+
+    /********************************************************************* 
+     getc from KBD will NOT get 0 byte but reading file (after redirect 0 
+    to file) may get 0 byte ==> MUST return 2-byte -1 to differentiate.
+    **********************************************************************/
+
+    if (n==0 || c==4 || c==0 ) return EOF;  
+                                    
+    return (c&0x7F);
 }
 
 int main(int argc, char *argv[])
 {    
-    int i, n, fd, intty, outtty, nbytes, offset;
+    int i, n, fd, intty, outtty, nbytes, offset; //, pipe = 0;
     char tty[32];
     prints("*******************************\n");
     prints("***********more Nofal***********\n");
@@ -40,14 +56,16 @@ int main(int argc, char *argv[])
     intty = open(tty, O_RDONLY);
     outtty = open(tty, O_WRONLY);
 
-    if (argv[1] != 0)
+    if (argc > 1)
     {
         fd = open(argv[1], O_RDONLY);
         if (fd < 0) return 0;
     }
+    //else
+       // pipe = 1;
 
     char q;
-    int r = 0, nline = 15;
+    int r = 0, nline = 25;
 
     while (q != 'q' && r != EOF)
     {
@@ -58,11 +76,14 @@ int main(int argc, char *argv[])
                 break;
             prints(mline);
         }
-        q = getc();
+        //if (!pipe) q = getc();
+        //else       
+        q = getcCustom(intty);
+
         if (q == '\r')
             nline = 1;
         else
-            nline = 15;
+            nline = 25;
     }
     close(fd);
     close(intty);
