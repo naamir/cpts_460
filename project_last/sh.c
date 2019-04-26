@@ -97,7 +97,7 @@ int mypipe(char *cmd) //char *cmd1, char *cmd2)
     split_up(cmd, cmd1, cmd2);
     printfCustom(outtty, "split_up -> cmd1:%s cmd2:%s\n", cmd1, cmd2);
 
-    // if (numpipes) mypipe(cmd2);
+    if (numpipes == 0) return 0;
     // else return 0;
     
     int pd[2], pid, r = 0;
@@ -110,7 +110,7 @@ int mypipe(char *cmd) //char *cmd1, char *cmd2)
         close(pd[1]);    // close pipe WRITE end
         dup2(pd[0], 0);  // redirect stdin to pipe READ end
         if (numpipes) mypipe(cmd2);
-        else return 0;
+        //else return 0;
     }
     else      // child: as pipe WRITER
     {
