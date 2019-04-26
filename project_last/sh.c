@@ -4,7 +4,9 @@ int tknum, saved_stdin, saved_stdout, intty, outtty;
 int numpipes, fd;//, pipeflag;
 char *tok[32], tty[32];
 
-char cmd1[64], cmd2[64], splittemp[128];
+static char cmd1[64];
+char cmd2[64];
+static char splittemp1[128], splittemp2[128];
 
 int tkpipnum;
 char *tokpip[32];
@@ -53,8 +55,9 @@ int split_up(char *cmdline, char *cmd1, char *cmd2)
 {
     int i = 0, n = 0;
     char *cp; //, *c1, *c2;
-    //strcpy(splittemp, cmdline);
-    cp = cmdline;
+    //strcpy(splittemp1, cmdline);
+    //strcpy(splittemp2, cmdline);
+    cp = cmdline; //splittemp1;
 
     while (*cp != '|' && *cp != '\r')
     {
@@ -63,38 +66,41 @@ int split_up(char *cmdline, char *cmd1, char *cmd2)
         cp++;
     }
     cmd1[i] = 0;
-
+    //strcpy(splittemp1, cmd1);
     if (*cp == '\r')  // reached the end of cmds
         return 0;
-    printsCustom(outtty, "****\n");
-    printsCustom(outtty, cmd1);
-    printsCustom(outtty, "\n");
+    // printsCustom(outtty, "****\n");
+    // printsCustom(outtty, cmd1);
+    // printsCustom(outtty, "\n");
 
     cp++; // miss the pipe...
     cp++; // ...and space
+
+    //cp = splittemp2 + i +2;
     while(*cp != '\r')
     {
         cmd2[n++] = *cp;
         cp++;
     }
     cmd2[n] = 0;
-    printsCustom(outtty, "****\n");
-    printsCustom(outtty, cmd2);
-    printsCustom(outtty, "\n");
+    // printsCustom(outtty, "****\n");
+    // printsCustom(outtty, cmd2);
+    // printsCustom(outtty, "\n");
 
     numpipes--;
 }
 
 int mypipe(char *cmd) //char *cmd1, char *cmd2)
 {
-    memset(cmd1, 0, 64);
+    //memset(cmd1, 0, 64);
     //memset(cmd2, 0, 64);
     split_up(cmd, cmd1, cmd2);
     printfCustom(outtty, "split_up -> cmd1:%s cmd2:%s\n", cmd1, cmd2);
 
-    if (numpipes) mypipe(cmd2);
-    else return 0;
-/*     int pd[2], pid, r = 0;
+    // if (numpipes) mypipe(cmd2);
+    // else return 0;
+    
+    int pd[2], pid, r = 0;
 
     pipe(pd);   // creates a PIPE; pd[0] for READ, pd[1] for WRITE
     pid = fork();  // fork a child to share a pipe
@@ -103,7 +109,8 @@ int mypipe(char *cmd) //char *cmd1, char *cmd2)
     {
         close(pd[1]);    // close pipe WRITE end
         dup2(pd[0], 0);  // redirect stdin to pipe READ end
-        exec(cmd2);
+        if (numpipes) mypipe(cmd2);
+        else return 0;
     }
     else      // child: as pipe WRITER
     {
@@ -113,7 +120,7 @@ int mypipe(char *cmd) //char *cmd1, char *cmd2)
         //tokenize_pipes(cmd1);
         //printfCustom(outtty, "tokpip:%s\n", tokpip[0]);
         exec(cmd1); //tokpip[0]);
-    } */
+    }
 }
 
 void parseArgs()
