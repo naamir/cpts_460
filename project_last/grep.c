@@ -23,21 +23,6 @@ int getmorline(char *line) //, char *buf)
     return n;
 }
 
-int getcCustom(int pd)
-{
-    int c, n;
-    n = read(pd, &c, 1);
-
-    /********************************************************************* 
-     getc from KBD will NOT get 0 byte but reading file (after redirect 0 
-    to file) may get 0 byte ==> MUST return 2-byte -1 to differentiate.
-    **********************************************************************/
-
-    if (n==0 || c==4 || c==0 ) return EOF;  
-                                    
-    return (c&0x7F);
-}
-
 int main(int argc, char *argv[])
 {
     int r = 0, n, fd, intty, outtty, nmatches = 0, patlen;
@@ -75,6 +60,9 @@ int main(int argc, char *argv[])
 
             r = getmorline(mline);
             //printf("r:%d", r);
+            // have no idea why we have to print a blank char to have grep work when getting
+            // data from a pipe, if this isn't there it becomes a broken pipe...
+            mputc(' ');
             if (r < 0) break;
             //prints(mline);
             cp = mline;
@@ -114,8 +102,9 @@ int main(int argc, char *argv[])
                 nmatches = 0;
                 prints(mline);
             }
-            getcCustom(intty);
+            
         }
+        //mputcCustom(outtty, '\r');//getcCustom(intty);
     }
     close(intty);
     close(outtty);

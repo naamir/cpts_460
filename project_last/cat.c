@@ -4,14 +4,24 @@ char tty[32];
 
 int main(int argc, char *argv[])
 {
+    //close(STDIN);
+    //close(STDOUT);
+    // get the current tty
+    //gettty(tty);
+    
+    //open the current tty for read and write
+    intty = STDIN; //open(tty, O_RDONLY);
+    //printf("intty:%d\n", intty);
+    outtty = STDOUT; //open(tty, O_WRONLY);
+    //printf("outtty:%d\n", outtty);
+
     char buf[BLKSIZE];
     int n, fd;
 
     prints("*******************************\n");
     prints("***********cat Nofal***********\n");
     prints("*******************************\n");
-    //gettty(tty);
-    //outtty = open(tty, O_WRONLY);
+
     if (argc == 1)
     {
         int l;
@@ -39,7 +49,6 @@ int main(int argc, char *argv[])
         }     
         close(fd);
     }
-    
-    //dup2(OUT, outtty);
-    
+    //close(intty);
+    //close(outtty);
 }

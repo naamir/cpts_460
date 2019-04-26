@@ -34,8 +34,8 @@ main(int argc, char *argv[])
     int i, t, num, n, fd, in, out, err, psw_flag;   // file descriptors for terminal I/O
     char ent_username[128], ent_password[128], buf[BLKSIZE];
 
-    close(IN);
-    close(OUT);
+    close(STDIN);
+    close(STDOUT);
 
     in = open(argv[1], O_RDONLY);   // file descriptor 0
     out = open(argv[1], O_WRONLY);   // for disply to console

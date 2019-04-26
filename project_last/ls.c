@@ -63,11 +63,9 @@ int main(int argc, char *argv[])
     
     //open the current tty for read and write
     intty = STDIN; //open(tty, O_RDONLY);
-    printf("intty:%d\n", intty);
+    //printf("intty:%d\n", intty);
     outtty = open(tty, O_WRONLY);
-    //if (outtty < 0)
-      //  outtty = STDOUT;
-    printf("outtty:%d\n", outtty);
+    //printf("outtty:%d\n", outtty);
 
 
     printsCustom(outtty, "********************************\n");
