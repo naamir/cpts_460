@@ -26,21 +26,6 @@ int getmorline(int fd, char *line) //, char *buf)
     return n;
 }
 
-int getcCustom(int pd)
-{
-    int c, n;
-    n = read(pd, &c, 1);
-
-    /********************************************************************* 
-     getc from KBD will NOT get 0 byte but reading file (after redirect 0 
-    to file) may get 0 byte ==> MUST return 2-byte -1 to differentiate.
-    **********************************************************************/
-
-    if (n==0 || c==4 || c==0 ) return EOF;  
-                                    
-    return (c&0x7F);
-}
-
 int main(int argc, char *argv[])
 {    
     int i, n, fd, intty, outtty, nbytes, offset; //, pipe = 0;

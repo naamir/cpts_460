@@ -252,3 +252,179 @@ int printk(char *fmt,...)
     cp++; ip++;
   }
 }
+/************************CUSTOM STDOUT*****************************/
+int mputcCustom(int fd, char c)
+{
+    write(fd, &c, 1);
+    if (c=='\n')
+        write(fd,&cr,1);
+    return 0;
+}
+
+void rpiCustom(int fd, int x)
+{
+   char c;
+   if (x==0) return;
+   c = ctable[x%10];
+   rpuCustom(fd, (int)x/10);
+   mputcCustom(fd, c);
+}
+
+void rpuCustom(int fd, u32 x)
+{
+   char c;
+   if (x==0) return;
+   c = ctable[x%10];
+   rpuCustom(fd, (u32)x/10);
+   mputcCustom(fd, c);
+}
+
+void rpxCustom(int fd, u32 x)
+{
+   char c;
+   if (x==0) return;
+   c = ctable[x%16];
+   rpxCustom(fd, (u32)x/16);
+   mputcCustom(fd, c);
+}
+
+void printsCustom(int fd, char *s)
+{
+    while (*s){
+        mputcCustom(fd, *s);
+        s++;
+    }
+}
+void printuCustom(int fd, u32 x)
+{
+    if (x==0){
+       printsCustom(fd, "0 ");
+       return;
+    }
+    rpuCustom(fd, (u32)x);
+    mputcCustom(fd, space);
+}
+
+void printiCustom(int fd, int x)
+{
+    if (x==0){
+       printsCustom(fd, "0 ");
+       return;
+    }
+    if (x < 0){
+       mputcCustom(fd, '-');
+       x = -x;
+    }
+    rpuCustom(fd, (int)x);
+    mputcCustom(fd, space);
+}
+
+void printxCustom(int fd, u32 x)
+{  
+  printsCustom(fd, "0x");
+   if (x==0){
+      prints("0 ");
+      return;
+   }
+   rpxCustom(fd, (u32)x);
+  mputcCustom(fd, space);
+}
+
+
+void printcCustom(int fd, char c)
+{
+  mputcCustom(fd, c);
+  c = c&0x7F;
+  if (c=='\n')
+    mputcCustom(fd, cr);
+}
+
+int printfCustom(int fd, char *fmt,...)
+{
+  char *cp, *cq;
+  int  *ip;
+
+  cq = cp = (char *)fmt;
+  ip = (int *)&fmt + 1;
+
+  while (*cp){
+    if (*cp != '%'){
+       printcCustom(fd, *cp);
+       cp++;
+       continue;
+    }
+    cp++;
+    switch(*cp){
+      case 'd' : printiCustom(fd, *ip); break;
+      case 'u' : printuCustom(fd, *ip); break;
+      case 'x' : printxCustom(fd, *ip); break;
+      case 's' : printsCustom(fd, (char *)*ip); break;
+      case 'c' : printcCustom(fd, (char)*ip);   break;
+    }
+    cp++; ip++;
+  }
+}
+
+/****************CUSTOM STDIN****************/
+int getcCustom(int fd)
+{
+    int c, n;
+    n = read(fd, &c, 1);
+
+    /********************************************************************* 
+     getc from KBD will NOT get 0 byte but reading file (after redirect 0 
+    to file) may get 0 byte ==> MUST return 2-byte -1 to differentiate.
+    **********************************************************************/
+
+    if (n==0 || c==4 || c==0 ) return EOF;  
+                                    
+    return (c&0x7F);
+}
+
+// gets() show each input char AND cook input line
+
+int getsCustom(int infd, int outfd, char *s)
+{
+    int c; char *cp, *cq, temp[128];
+
+    cp = temp;    // get chars into temp[] first
+
+    c = getcCustom(infd);
+    while (c!= EOF && c != '\r' && c != '\n'){
+        *cp++ = c;
+        if (c=='\r'){
+            mputcCustom(outfd, 'n');
+        }
+        mputcCustom(outfd, c);
+        if (c == '\b'){ // handle \b key
+            mputcCustom(outfd, ' ');
+            mputcCustom(outfd, '\b');
+        }
+        c = getcCustom(infd);
+    }
+    mputcCustom(outfd, '\n'); mputcCustom(outfd, '\r');
+
+    if (c==EOF) return 0;
+
+    *cp = 0;   
+
+    // printf("temp=%s\n", temp);
+
+    // cook line in temp[] into s
+    cp = temp; cq = s; 
+
+    while (*cp){
+        if (*cp == '\b'){
+            if (cq > s)
+                cq--; 
+            cp++;
+            continue;
+        }
+        *cq++ = *cp++;
+    }
+    *cq = 0;
+
+    //printf("s=%s\n", s);
+
+    return strlen(s)+1;  // line=CR or \n only return 1
+}

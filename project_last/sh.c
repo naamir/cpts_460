@@ -107,7 +107,7 @@ void parseArgs()
     {
         if (strcmp(tok[n], "<") == 0)
         {
-            prints("Redirect Input < infile\n");  // take inputs from infile
+            printsCustom(outtty, "Redirect Input < infile\n");  // take inputs from infile
             fd = open(tok[n+1], O_RDONLY);  // open filename for READ, which
                                                 // will replace fd 0
             //saved_stdin = dup(IN);
@@ -115,7 +115,7 @@ void parseArgs()
         }
         else if (strcmp(tok[n], ">") == 0)
         {
-            prints("Redirect Output > outfile\n");  // send outputs to outfile
+            printsCustom(outtty, "Redirect Output > outfile\n");  // send outputs to outfile
             fd = open(tok[n+1], O_WRONLY|O_CREAT); // open filename for WRITE, which
                                                             // will replace fd 0
             //saved_stdout = dup(OUT);
@@ -124,7 +124,7 @@ void parseArgs()
         }
         else if (strcmp(tok[n], ">>") == 0)
         {
-            prints("Redirect Output >> outfile APPEND\n");  // APPEND outputs to outfile
+            printsCustom(outtty, "Redirect Output >> outfile APPEND\n");  // APPEND outputs to outfile
             fd = open(tok[n+1], O_WRONLY|O_CREAT|O_APPEND); // open filename for WRITE, which
                                                             // will replace fd 0
             //saved_stdout = dup(OUT);
@@ -133,9 +133,9 @@ void parseArgs()
         }
         else if (strcmp(tok[n], "|") == 0)
         {
-            prints("has | let the pipin beginnnn\n");  // pipe dat shiz
+            printsCustom(outtty, "has | let the pipin beginnnn\n");  // pipe dat shiz
             numpipes++;
-            printf("numpipes:%d\n", numpipes);
+            printfCustom(outtty, "numpipes:%d\n", numpipes);
         }
     }
 }
@@ -145,20 +145,18 @@ main(int argc, char *argv[])
     int r, pid, status;
     char cmdline[128], noIOcmd[128];
 
-    // // get the current tty
-    // gettty(tty);
+    // get the current tty
+    gettty(tty);
 
-    // //open the current tty for read and write
-    // intty = open(tty, O_RDONLY);
-    // outtty = open(tty, O_WRONLY);
-    // //reset stdin and stdout
-    // dup2(IN, intty);
-    // dup2(OUT, outtty);
+    //open the current tty for read and write
+    intty = open(tty, O_RDONLY);
+    outtty = open(tty, O_WRONLY);
+
     while (1)
     {
         memset(cmdline, 0, 128);
         numpipes = 0;
-        prints("sh: #"); gets(cmdline);
+        printsCustom(outtty, "sh: #"); getsCustom(intty, outtty, cmdline);
         //prints("cmd: "); prints(cmdline); prints("\n");
         if (strcmp(cmdline, "\0") == 0 || cmdline[0] == ' ') 
             continue;
@@ -174,30 +172,30 @@ main(int argc, char *argv[])
         
         if (strcmp(cmdline, "cd") == 0 && tknum == 1)
         {
-            if (chdir("/") < 0)    prints("chdir unsuccessful\n");
+            if (chdir("/") < 0)    printsCustom(outtty, "chdir unsuccessful\n");
             continue;
         }
         // need to deal with arguments!
         else if (strcmp(cmdline, "cd") == 0 && tknum == 2)
         {
-            if (chdir(tok[1]) < 0)    prints("chdir unsuccessful\n");
+            if (chdir(tok[1]) < 0)    printsCustom(outtty, "chdir unsuccessful\n");
             continue;
         }
         else if (strcmp(cmdline, "cd") == 0 && tknum > 2)
         {
-            prints("too many args\n");
+            printsCustom(outtty, "too many args\n");
             continue;
         }
         
         //if (strcmp(cmdline, "\n")) continue;
-        printf("\nTHIS IS %d  MY PARENT=%d\n", getpid(), getppid());
+        printfCustom(outtty, "\nTHIS IS %d  MY PARENT=%d\n", getpid(), getppid());
 
-        prints("********nofal program exec********\n");
+        printsCustom(outtty, "********nofal program exec********\n");
         parseArgs();
         // add piping function....
         if (numpipes > 0)
         {
-            prints("bepipin\n");
+            printsCustom(outtty, "bepipin\n");
             // char cmd1[64], cmd2[64];
             // strcpy(cmd1, tok[0]);   strcpy(cmd2, tok[3]);
             // strcat(cmd1, " ");      //strcat(cmd2, " ");
@@ -212,19 +210,19 @@ main(int argc, char *argv[])
             //prints("cmd2: "); prints(noIOcmd); prints("\n");
             
             r = exec(noIOcmd);
-            if (r < 0)    prints("exec error - cmd not found\n");
+            if (r < 0)    printsCustom(outtty, "exec error - cmd not found\n");
 
             exit(1);
         }
         else
         {
-            printf("PARENT %d WAITS FOR CHILD %d TO DIE\n", getpid(), pid);
+            printfCustom(outtty, "PARENT %d WAITS FOR CHILD %d TO DIE\n", getpid(), pid);
             pid = wait(&status);
-            printf("DEAD CHILD=%d, HOW=%04x\n", pid, status);
+            printfCustom(outtty, "DEAD CHILD=%d, HOW=%04x\n", pid, status);
         }
 
     }
     //close(saved_stdout);
-    // close(intty);
-    // close(outtty);
+    close(intty);
+    close(outtty);
 }

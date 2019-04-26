@@ -2,7 +2,6 @@
 
 char q, mline[128];
 
-
 int getmorline(char *line) //, char *buf)
 {
     int n, i=0;
@@ -38,50 +37,17 @@ int getcCustom(int pd)
                                     
     return (c&0x7F);
 }
-/* 
-int strncmp(char *s1, char *s2, int n)
-{
-    while((*s1 && *s2) && (*s1==*s2) && n){
-        s1++; s2++; n--;
-    }
-    if ((*s1==0) && (*s2==0))
-        return 0;
-    return(*s1 - *s2);
-} */
-
-int patterncheck(char *pat, int patlen, char *string, int strl, int intty)
-{
-    int i, n;
-    //patlen = strlen(pat);
-    //char *temp;
-
-    //temp = (char *)malloc(patlen * sizeof(char));
-/*     for (i = 0; i < strl; i++)
-    {
-        //strncmp(pat, string, patlen);
-        for (n = 0; n < patlen; n++)
-        {
-            if (pat[n] == string[i])
-
-        }
-    }  */
-    while (strncmp(pat, string, patlen) != 0)
-    {
-        getcCustom(intty);
-        string++;
-    }
-
-}
 
 int main(int argc, char *argv[])
 {
-    int i, r=0, n, fd, intty, outtty;
+    int r = 0, n, fd, intty, outtty, nmatches = 0, patlen;
     char buf[128], tty[32];
 
     prints("********************************\n");
     prints("***********grep Nofal***********\n");
     prints("********************************\n");
 
+    patlen = strlen(argv[1]);
     // get the current tty
     gettty(tty);
     
@@ -103,26 +69,55 @@ int main(int argc, char *argv[])
     {
         while (r != EOF)
         {
-            int i=0;
+            int i=0, n;
             char temp[64];
-            char *cp;
+            char *cp, *cq;
+
             r = getmorline(mline);
-            //prints("test1\n");
-            printf("strncmp args: %d, %s\n", strlen(argv[1]), argv[1]); //, mline);
-            prints(mline);
-            
-            //if (patterncheck(argv[1], strlen(argv[1]), mline, strlen(mline), intty) == 0)
-            //    prints("found pattern!!!\n");
-            strncpy(temp, mline, strlen(argv[1]));
-            while (strncmp(argv[1], temp, strlen(argv[1])) != 0)
+            //printf("r:%d", r);
+            if (r < 0) break;
+            //prints(mline);
+            cp = mline;
+            cq = argv[1];
+
+            while (*cp != '\n')
             {
-                prints("test");
-                getcCustom(intty);
-                mline[i] = mline[i+1];
-                strcpy(temp, mline);
-                i++;
+
+                //printf("cp:%c, cq:%c  ", *cp, *cq);
+                if (*cp == *cq)
+                {
+                    char *tcp;
+                    tcp = cp;
+                    //getcCustom(intty);
+                    
+                    for (n=0; n < patlen; n++)
+                    {
+                        temp[n] = *tcp;
+                        tcp++;
+                    }
+                    temp[patlen] = 0;
+                    //printf("temp %s\n", temp);
+                }
+
+                if (strcmp(temp, argv[1]) == 0)
+                {
+                    //prints("found pattern!!!\n");
+                    memset(&temp, 0, patlen);
+                    nmatches++;
+                    //i = 0;
+                }
+                
+                cp++;
             }
-            
+            if (nmatches > 0)
+            {
+                nmatches = 0;
+                prints(mline);
+            }
+            getcCustom(intty);
         }
-    }   
+    }
+    close(intty);
+    close(outtty);
+    //getcCustom(intty);
 }

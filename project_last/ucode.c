@@ -23,8 +23,8 @@ typedef unsigned int   u32;
 #include "crt0.c"
 //#include "string.h"
 
-#define IN      0
-#define OUT     1
+#define STDIN  0
+#define STDOUT 1
 #define BLKSIZE 1024
 
 int pid;
@@ -78,48 +78,48 @@ int getline(char *s)
 
 int gets(char *s)
 {
-  int c; char *cp, *cq, temp[128];
-  
-  cp = temp;    // get chars into temp[] first
+    int c; char *cp, *cq, temp[128];
 
-  c = getc();
-  while (c!= EOF && c != '\r' && c != '\n'){
-    *cp++ = c;
-    if (c=='\r'){
-      mputc('n');
-    }
-    mputc(c);
-    if (c == '\b'){ // handle \b key
-      mputc(' ');
-      mputc('\b');
-    }
+    cp = temp;    // get chars into temp[] first
+
     c = getc();
-  }
-  mputc('\n'); mputc('\r');
-
-  if (c==EOF) return 0;
-  
-  *cp = 0;   
-
-  // printf("temp=%s\n", temp);
-
-  // cook line in temp[] into s
-  cp = temp; cq = s; 
-
-  while (*cp){
-    if (*cp == '\b'){
-      if (cq > s)
-	  cq--; 
-      cp++;
-      continue;
+    while (c!= EOF && c != '\r' && c != '\n'){
+        *cp++ = c;
+        if (c=='\r'){
+            mputc('n');
+        }
+        mputc(c);
+        if (c == '\b'){ // handle \b key
+            mputc(' ');
+            mputc('\b');
+        }
+        c = getc();
     }
-    *cq++ = *cp++;
-  }
-  *cq = 0;
+    mputc('\n'); mputc('\r');
 
-  //printf("s=%s\n", s);
+    if (c==EOF) return 0;
 
-  return strlen(s)+1;  // line=CR or \n only return 1
+    *cp = 0;   
+
+    // printf("temp=%s\n", temp);
+
+    // cook line in temp[] into s
+    cp = temp; cq = s; 
+
+    while (*cp){
+        if (*cp == '\b'){
+            if (cq > s)
+                cq--; 
+            cp++;
+            continue;
+        }
+        *cq++ = *cp++;
+    }
+    *cq = 0;
+
+    //printf("s=%s\n", s);
+
+    return strlen(s)+1;  // line=CR or \n only return 1
 }
 
 
@@ -492,8 +492,8 @@ int eatpath(char *line, char *name[ ])
     while (*cp != 0){
         while (*cp == ' ')
             *cp++ = 0;       
-        if (*cp != 0)
-            name[n++] = cp; 
+            if (*cp != 0)
+                name[n++] = cp; 
         while (*cp != '\n' && *cp != 0)
             cp++; 
         if (*cp != 0)       
