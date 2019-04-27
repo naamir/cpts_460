@@ -81,7 +81,7 @@ int mypipe(char *cmd) //char *cmd1, char *cmd2)
         close(pd[0]);    // close pipe READ end
         dup2(pd[1], 1);  // redirect stout to pipe WRITE end
 
-        tokenize_line(cmd1);
+        //tokenize_line(cmd1);
 
         exec(cmd1);
     }
