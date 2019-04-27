@@ -8,29 +8,6 @@ static char cmd1[64];
 char cmd2[64];
 static char splittemp1[128], splittemp2[128];
 
-int tkpipnum;
-char *tokpip[32];
-
-void tokenize_pipes(char *line)
-{
-    char *cp;
-    cp = line;
-    tkpipnum = 0;
-    
-    while (*cp != 0){
-        while (*cp == ' ') *cp++ = 0;        
-        if (*cp != 0)
-            tokpip[tkpipnum++] = cp;         
-        while (*cp != '|' && *cp != 0) cp++;                  
-        if (*cp != 0)   
-            *cp = 0;                   
-        else 
-                break; 
-        cp++;
-    }
-    tokpip[tkpipnum] = 0;
-}
-
 void tokenize_line(char *line)
 {
     char *cp;
@@ -55,8 +32,7 @@ int split_up(char *cmdline, char *cmd1, char *cmd2)
 {
     int i = 0, n = 0;
     char *cp; //, *c1, *c2;
-    //strcpy(splittemp1, cmdline);
-    //strcpy(splittemp2, cmdline);
+
     cp = cmdline; //splittemp1;
 
     while (*cp != '|' && *cp != '\r')
@@ -66,39 +42,27 @@ int split_up(char *cmdline, char *cmd1, char *cmd2)
         cp++;
     }
     cmd1[i] = 0;
-    //strcpy(splittemp1, cmd1);
+
     if (*cp == '\r')  // reached the end of cmds
         return 0;
-    // printsCustom(outtty, "****\n");
-    // printsCustom(outtty, cmd1);
-    // printsCustom(outtty, "\n");
 
     cp++; // miss the pipe...
     cp++; // ...and space
 
-    //cp = splittemp2 + i +2;
     while(*cp != '\r')
     {
         cmd2[n++] = *cp;
         cp++;
     }
     cmd2[n] = 0;
-    // printsCustom(outtty, "****\n");
-    // printsCustom(outtty, cmd2);
-    // printsCustom(outtty, "\n");
 
     numpipes--;
 }
 
 int mypipe(char *cmd) //char *cmd1, char *cmd2)
 {
-    //memset(cmd1, 0, 64);
-    //memset(cmd2, 0, 64);
     split_up(cmd, cmd1, cmd2);
     printfCustom(outtty, "split_up -> cmd1:%s cmd2:%s\n", cmd1, cmd2);
-
-    if (numpipes == 0) return 0;
-    // else return 0;
     
     int pd[2], pid, r = 0;
 
@@ -110,16 +74,16 @@ int mypipe(char *cmd) //char *cmd1, char *cmd2)
         close(pd[1]);    // close pipe WRITE end
         dup2(pd[0], 0);  // redirect stdin to pipe READ end
         if (numpipes) mypipe(cmd2);
-        //else return 0;
+        else exec(cmd2);
     }
     else      // child: as pipe WRITER
     {
         close(pd[0]);    // close pipe READ end
         dup2(pd[1], 1);  // redirect stout to pipe WRITE end
 
-        //tokenize_pipes(cmd1);
-        //printfCustom(outtty, "tokpip:%s\n", tokpip[0]);
-        exec(cmd1); //tokpip[0]);
+        tokenize_line(cmd1);
+
+        exec(cmd1);
     }
 }
 
@@ -131,10 +95,12 @@ void parseArgs()
         if (strcmp(tok[n], "<") == 0)
         {
             printsCustom(outtty, "Redirect Input < infile\n");  // take inputs from infile
+            close(STDIN);
+            printfCustom(outtty, "tok[n+1]=%s tok[n]=%s\n", tok[n+1], tok[n]); 
             fd = open(tok[n+1], O_RDONLY);  // open filename for READ, which
                                                 // will replace fd 0
-            //saved_stdin = dup(IN);
-            dup2(fd, intty);    // system call to close file descriptor IN (0)
+            
+            //dup2(fd, STDIN);    // system call to close file descriptor IN (0)
         }
         else if (strcmp(tok[n], ">") == 0)
         {
@@ -142,8 +108,8 @@ void parseArgs()
             fd = open(tok[n+1], O_WRONLY|O_CREAT); // open filename for WRITE, which
                                                             // will replace fd 0
             //saved_stdout = dup(OUT);
-            dup2(fd, outtty);    // system call to close file descriptor OUT (1)
-            close(fd);
+            dup2(fd, STDOUT);    // system call to close file descriptor OUT (1)
+            //close(fd);
         }
         else if (strcmp(tok[n], ">>") == 0)
         {
@@ -151,8 +117,8 @@ void parseArgs()
             fd = open(tok[n+1], O_WRONLY|O_CREAT|O_APPEND); // open filename for WRITE, which
                                                             // will replace fd 0
             //saved_stdout = dup(OUT);
-            dup2(fd, outtty);    // system call to close file descriptor OUT (1)
-            close(fd);
+            dup2(fd, STDOUT);    // system call to close file descriptor OUT (1)
+            //close(fd);
         }
         else if (strcmp(tok[n], "|") == 0)
         {
@@ -165,9 +131,6 @@ void parseArgs()
 
 main(int argc, char *argv[])
 {
-    //close(STDIN);
-    //close(STDOUT);
-
     int r, pid, status;
     char cmdline[128], noIOcmd[128];
 
@@ -177,7 +140,6 @@ main(int argc, char *argv[])
     //open the current tty for read and write
     intty = STDIN; //open(tty, O_RDONLY);
     outtty = STDOUT; //open(tty, O_WRONLY);
-    //fixtty(tty);
 
     while (1)
     {

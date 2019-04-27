@@ -16,11 +16,11 @@ int getmorline(char *line) //, char *buf)
             line[i] = 0;
             return EOF;
         }
-        //mputc(c);
+        mputc(c);
         line[i++] = c;
     }
     line[i] = 0;
-    return n;
+    return i;
 }
 
 int main(int argc, char *argv[])

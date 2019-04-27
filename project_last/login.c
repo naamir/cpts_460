@@ -55,8 +55,7 @@ main(int argc, char *argv[])
         buf[n] = 0;
         num = eatpath(buf, myline);
         psw_flag = 0;
-        memset(ent_username, 0, 128);
-        memset(ent_password, 0, 128);
+        
         prints("login_n:"); gets(ent_username);
         prints("password_n:"); gets(ent_password);
         for (i=0; i < num; i++)
@@ -120,11 +119,18 @@ main(int argc, char *argv[])
             {
                 psw_flag = 1;
                 prints("incorrect password!\n");
+                memset(ent_username, 0, 128);
+                memset(ent_password, 0, 128);
                 break;
             }
         }
         
-        if (!psw_flag) prints("username not found!\n");
+        if (!psw_flag) 
+        {
+            memset(ent_username, 0, 128);
+            memset(ent_password, 0, 128);
+            prints("username not found!\n");
+        }
     }
     prints("login failed, try again\n");
 }
